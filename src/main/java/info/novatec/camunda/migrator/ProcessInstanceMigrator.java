@@ -21,6 +21,7 @@ import info.novatec.camunda.migrator.migration.CustomMigrationPlan;
 import info.novatec.camunda.migrator.migration.PerformMigration;
 import info.novatec.camunda.migrator.plan.CreatePatchMigrationplan;
 import info.novatec.camunda.migrator.plan.VersionedDefinitionId;
+import info.novatec.camunda.migrator.processmetadata.LoadProcessDefinitionKeys;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -42,17 +43,14 @@ public class ProcessInstanceMigrator {
     private final MigratorLogger migratorLogger;
     private final GetMigrationInstructions getMigrationInstructions;
     private final PerformMigration performMigration;
+    private final LoadProcessDefinitionKeys loadProcessDefinitionkeys;
 
     public static ProcessInstanceMigratorBuilder builder() {
         return new ProcessInstanceMigratorBuilder();
     }
 
     public void migrateInstancesOfAllProcesses() {
-        processEngine.getRepositoryService().createProcessDefinitionQuery()
-            .active()
-            .latestVersion()
-            .list()
-            .forEach(processDefinition -> migrateProcessInstances(processDefinition.getKey()));
+		loadProcessDefinitionkeys.loadKeys().forEach(this::migrateProcessInstances);
     }
 
     //TODO: make private

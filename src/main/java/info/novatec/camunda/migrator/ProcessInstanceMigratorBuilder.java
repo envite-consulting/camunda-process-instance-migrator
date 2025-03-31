@@ -12,6 +12,8 @@ import info.novatec.camunda.migrator.migration.PerformMigration;
 import info.novatec.camunda.migrator.migration.PerformMigrationDefaultImpl;
 import info.novatec.camunda.migrator.plan.CreatePatchMigrationplan;
 import info.novatec.camunda.migrator.plan.CreatePatchMigrationplanDefaultImpl;
+import info.novatec.camunda.migrator.processmetadata.LoadProcessDefinitionKeys;
+import info.novatec.camunda.migrator.processmetadata.LoadProcessDefinitionKeysDefaultImpl;
 import lombok.NoArgsConstructor;
 
 /**
@@ -28,6 +30,7 @@ public class ProcessInstanceMigratorBuilder {
     private MigratorLogger migratorLoggerToSet;
     private GetMigrationInstructions getMigrationInstructionsToSet;
     private PerformMigration performMigration;
+    private LoadProcessDefinitionKeys loadProcessDefinitionKeys;
 
     public ProcessInstanceMigratorBuilder ofProcessEngine(ProcessEngine processEngine) {
         processEngineToSet = processEngine;
@@ -45,6 +48,9 @@ public class ProcessInstanceMigratorBuilder {
         }
         if (performMigration == null) {
         	this.performMigration = new PerformMigrationDefaultImpl(processEngine);
+        }
+        if (loadProcessDefinitionKeys == null) {
+        	this.loadProcessDefinitionKeys = new LoadProcessDefinitionKeysDefaultImpl(processEngine);
         }
         return this;
     }
@@ -71,13 +77,19 @@ public class ProcessInstanceMigratorBuilder {
         this.getMigrationInstructionsToSet = getMigrationInstructions;
         return this;
     }
+    
+	public ProcessInstanceMigratorBuilder withLoadProcessDefinitionKeys(
+			LoadProcessDefinitionKeys loadProcessDefinitionKeys) {
+		this.loadProcessDefinitionKeys = loadProcessDefinitionKeys;
+		return this;
+    }
 
     public ProcessInstanceMigrator build() {
         if (processEngineToSet == null) {
             throw new ProcessInstanceMigratorConfigurationException();
         }
-        return new ProcessInstanceMigrator(processEngineToSet, getOlderProcessInstancesToSet,
-            createPatchMigrationplanToSet,
-            migratorLoggerToSet, getMigrationInstructionsToSet, performMigration);
+		return new ProcessInstanceMigrator(processEngineToSet, getOlderProcessInstancesToSet,
+				createPatchMigrationplanToSet, migratorLoggerToSet, getMigrationInstructionsToSet, performMigration,
+				loadProcessDefinitionKeys);
     }
 }
