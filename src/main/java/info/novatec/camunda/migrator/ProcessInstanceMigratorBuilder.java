@@ -6,6 +6,8 @@ import info.novatec.camunda.migrator.instances.GetOlderProcessInstances;
 import info.novatec.camunda.migrator.instances.GetOlderProcessInstancesDefaultImpl;
 import info.novatec.camunda.migrator.instructions.GetMigrationInstructions;
 import info.novatec.camunda.migrator.instructions.MigrationInstructionsMap;
+import info.novatec.camunda.migrator.logging.GenerateAllInstancesLoggingData;
+import info.novatec.camunda.migrator.logging.GenerateAllInstancesLoggingDataDefaultImpl;
 import info.novatec.camunda.migrator.logging.MigratorLogger;
 import info.novatec.camunda.migrator.logging.MigratorLoggerDefaultImpl;
 import info.novatec.camunda.migrator.migration.PerformMigration;
@@ -26,7 +28,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProcessInstanceMigratorBuilder {
 
-    private ProcessEngine processEngineToSet;
     private GetOlderProcessInstances getOlderProcessInstancesToSet;
     private CreatePatchMigrationplan createPatchMigrationplanToSet;
     private MigratorLogger migratorLoggerToSet;
@@ -34,9 +35,9 @@ public class ProcessInstanceMigratorBuilder {
     private PerformMigration performMigration;
     private LoadProcessDefinitionKeys loadProcessDefinitionKeys;
     private LoadNewestDeployedVersion loadNewestDeployedVersion;
+    private GenerateAllInstancesLoggingData generateAllInstancesLoggingData;
 
     public ProcessInstanceMigratorBuilder ofProcessEngine(ProcessEngine processEngine) {
-        processEngineToSet = processEngine;
         if (getOlderProcessInstancesToSet == null) {
             this.getOlderProcessInstancesToSet = new GetOlderProcessInstancesDefaultImpl(processEngine);
         }
@@ -57,6 +58,9 @@ public class ProcessInstanceMigratorBuilder {
         }
         if (loadNewestDeployedVersion == null) {
         	this.loadNewestDeployedVersion = new LoadNewestDeployedVersionDefaultImpl(processEngine);
+        }
+        if (generateAllInstancesLoggingData == null) {
+        	this.generateAllInstancesLoggingData = new GenerateAllInstancesLoggingDataDefaultImpl(processEngine);
         }
         return this;
     }
@@ -89,13 +93,22 @@ public class ProcessInstanceMigratorBuilder {
 		this.loadProcessDefinitionKeys = loadProcessDefinitionKeys;
 		return this;
     }
+	
+	public ProcessInstanceMigratorBuilder withLoadNewestDeployedVersion(
+			LoadNewestDeployedVersion loadNewestDeployedVersion) {
+		this.loadNewestDeployedVersion = loadNewestDeployedVersion;
+		return this;
+	}
+	
+	public ProcessInstanceMigratorBuilder withGenerateAllInstancesLoggingData(
+			GenerateAllInstancesLoggingData generateAllInstancesLoggingData) {
+		this.generateAllInstancesLoggingData = generateAllInstancesLoggingData;
+		return this;
+	}
 
     public ProcessInstanceMigrator build() {
-        if (processEngineToSet == null) {
-            throw new ProcessInstanceMigratorConfigurationException();
-        }
-		return new ProcessInstanceMigrator(processEngineToSet, getOlderProcessInstancesToSet,
+		return new ProcessInstanceMigrator(getOlderProcessInstancesToSet,
 				createPatchMigrationplanToSet, migratorLoggerToSet, getMigrationInstructionsToSet, performMigration,
-				loadProcessDefinitionKeys, loadNewestDeployedVersion);
+				loadProcessDefinitionKeys, loadNewestDeployedVersion, generateAllInstancesLoggingData);
     }
 }

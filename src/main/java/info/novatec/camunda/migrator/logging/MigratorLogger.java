@@ -29,17 +29,9 @@ public interface MigratorLogger {
     /**
      * Creates a log message containing the information of process instances that are subject of migration.
      *
-     * @param processDefinitionId
-     *            the process definition id of the process instances
-     * @param versionTag
-     *            the version tag of the process instances
-     * @param numberOfInstances
-     *            the number of process instances
-     * @param businessKeys
-     *            a string containing the combined business keys of the process instances
+     * @param loggingData all data that is to be logged.
      */
-    public void logProcessInstancesInfo(String processDefinitionId, String versionTag, int numberOfInstances,
-        String businessKeys);
+    public void logProcessInstancesInfo(ExistingInstancesLoggingData loggingData);
 
     /**
      * Creates a log message indicating that no process instances with a given key were deployed.
