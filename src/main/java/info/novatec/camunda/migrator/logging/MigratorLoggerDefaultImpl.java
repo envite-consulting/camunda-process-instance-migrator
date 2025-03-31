@@ -24,10 +24,10 @@ public class MigratorLoggerDefaultImpl implements MigratorLogger {
 	}
 
 	@Override
-	public void logProcessInstancesInfo(String processDefinitionId, String versionTag, int numberOfInstances,
-			String businessKeys) {
-		log.info("processDefinitionId: {}, versionTag: {}, count {}, businessKeys: {}", processDefinitionId, versionTag,
-				numberOfInstances, businessKeys);
+	public void logProcessInstancesInfo(ExistingInstancesLoggingData loggingData) {
+		log.info("processDefinitionId: {}, versionTag: {}, count {}, businessKeys: {}",
+				loggingData.getProcessDefinitionId(), loggingData.getVersionTag(), loggingData.getNumberOfInstances(),
+				loggingData.getBusinessKeyListString());
 
 	}
 

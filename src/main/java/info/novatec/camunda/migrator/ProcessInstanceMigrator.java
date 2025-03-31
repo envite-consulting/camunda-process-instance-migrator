@@ -2,11 +2,6 @@ package info.novatec.camunda.migrator;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.camunda.bpm.engine.ProcessEngine;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
 
 import info.novatec.camunda.migrator.instances.GetOlderProcessInstances;
 import info.novatec.camunda.migrator.instances.VersionedProcessInstance;
@@ -15,11 +10,13 @@ import info.novatec.camunda.migrator.instructions.MigrationInstructionCombiner;
 import info.novatec.camunda.migrator.instructions.MigrationInstructionsAdder;
 import info.novatec.camunda.migrator.instructions.MigrationInstructionsMap;
 import info.novatec.camunda.migrator.instructions.MinorMigrationInstructions;
+import info.novatec.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import info.novatec.camunda.migrator.logging.MigratorLogger;
 import info.novatec.camunda.migrator.migration.CustomMigrationInstruction;
 import info.novatec.camunda.migrator.migration.CustomMigrationPlan;
 import info.novatec.camunda.migrator.migration.PerformMigration;
 import info.novatec.camunda.migrator.plan.CreatePatchMigrationplan;
+import info.novatec.camunda.migrator.plan.LoadNewestDeployedVersion;
 import info.novatec.camunda.migrator.plan.VersionedDefinitionId;
 import info.novatec.camunda.migrator.processmetadata.LoadProcessDefinitionKeys;
 import lombok.AccessLevel;
@@ -37,13 +34,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProcessInstanceMigrator {
 
-    private final ProcessEngine processEngine;
     private final GetOlderProcessInstances getOlderProcessInstances;
     private final CreatePatchMigrationplan createPatchMigrationplan;
     private final MigratorLogger migratorLogger;
     private final GetMigrationInstructions getMigrationInstructions;
     private final PerformMigration performMigration;
     private final LoadProcessDefinitionKeys loadProcessDefinitionkeys;
+    private final LoadNewestDeployedVersion loadNewestDeployedVersion;
+    private final GenerateAllInstancesLoggingData generateAllInstancesLoggingData;
 
     public static ProcessInstanceMigratorBuilder builder() {
         return new ProcessInstanceMigratorBuilder();
@@ -57,9 +55,11 @@ public class ProcessInstanceMigrator {
     public void migrateProcessInstances(String processDefinitionKey) {
     	migratorLogger.logMigrationStart(processDefinitionKey);
     	migratorLogger.logMessageForInstancesBeforeMigration(processDefinitionKey);
-        logExistingProcessInstanceInfos(processDefinitionKey);
+		generateAllInstancesLoggingData.forDefinitionKey(processDefinitionKey).stream()
+				.forEach(loggingData -> migratorLogger.logProcessInstancesInfo(loggingData));
 
-        Optional<VersionedDefinitionId> newestProcessDefinition = getNewestDeployedVersion(processDefinitionKey);
+		Optional<VersionedDefinitionId> newestProcessDefinition = loadNewestDeployedVersion
+				.forProcessDefinitionKey(processDefinitionKey);
         if (!newestProcessDefinition.isPresent()) {
         	migratorLogger.logNoProcessInstancesDeployedWithKey(processDefinitionKey);
         } else if (!newestProcessDefinition.get().getProcessVersion().isPresent()) {
@@ -110,33 +110,8 @@ public class ProcessInstanceMigrator {
 
         }
         migratorLogger.logMessageForInstancesAfterMigration(processDefinitionKey);
-        logExistingProcessInstanceInfos(processDefinitionKey);
-    }
-
-    private void logExistingProcessInstanceInfos(String processDefinitionKey) {
-        processEngine.getRuntimeService().createProcessInstanceQuery()
-                .processDefinitionKey(processDefinitionKey)
-                .orderByBusinessKey()
-                .asc()
-                .list()
-                .stream()
-                .collect(Collectors.groupingBy(ProcessInstance::getProcessDefinitionId))
-                .forEach((processDefinitionId, instances) -> {
-                    ProcessDefinition processDefinition = processEngine.getRepositoryService().createProcessDefinitionQuery().processDefinitionId(processDefinitionId).singleResult();
-                    String businessKeys = instances.stream().map(instance -> instance.getBusinessKey()).collect(Collectors.joining(","));
-                    migratorLogger.logProcessInstancesInfo(processDefinitionId, processDefinition.getVersionTag(), instances.size(), businessKeys);
-        });
-    }
-
-    private Optional<VersionedDefinitionId> getNewestDeployedVersion(String processDefinitionKey) {
-        ProcessDefinition latestProcessDefinition = processEngine.getRepositoryService().createProcessDefinitionQuery()
-                .processDefinitionKey(processDefinitionKey)
-                .latestVersion()
-                .active()
-                .singleResult();
-
-        return Optional.ofNullable(latestProcessDefinition).map(processDefinition ->
-                    new VersionedDefinitionId(ProcessVersion.fromString(processDefinition.getVersionTag()), processDefinition.getId()));
+		generateAllInstancesLoggingData.forDefinitionKey(processDefinitionKey).stream()
+				.forEach(loggingData -> migratorLogger.logProcessInstancesInfo(loggingData));
     }
 
 }
