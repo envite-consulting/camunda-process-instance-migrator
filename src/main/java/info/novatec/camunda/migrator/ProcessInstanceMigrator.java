@@ -20,6 +20,7 @@ import info.novatec.camunda.migrator.migration.CustomMigrationInstruction;
 import info.novatec.camunda.migrator.migration.CustomMigrationPlan;
 import info.novatec.camunda.migrator.migration.PerformMigration;
 import info.novatec.camunda.migrator.plan.CreatePatchMigrationplan;
+import info.novatec.camunda.migrator.plan.LoadNewestDeployedVersion;
 import info.novatec.camunda.migrator.plan.VersionedDefinitionId;
 import info.novatec.camunda.migrator.processmetadata.LoadProcessDefinitionKeys;
 import lombok.AccessLevel;
@@ -44,6 +45,7 @@ public class ProcessInstanceMigrator {
     private final GetMigrationInstructions getMigrationInstructions;
     private final PerformMigration performMigration;
     private final LoadProcessDefinitionKeys loadProcessDefinitionkeys;
+    private final LoadNewestDeployedVersion loadNewestDeployedVersion;
 
     public static ProcessInstanceMigratorBuilder builder() {
         return new ProcessInstanceMigratorBuilder();
@@ -59,7 +61,8 @@ public class ProcessInstanceMigrator {
     	migratorLogger.logMessageForInstancesBeforeMigration(processDefinitionKey);
         logExistingProcessInstanceInfos(processDefinitionKey);
 
-        Optional<VersionedDefinitionId> newestProcessDefinition = getNewestDeployedVersion(processDefinitionKey);
+		Optional<VersionedDefinitionId> newestProcessDefinition = loadNewestDeployedVersion
+				.forProcessDefinitionKey(processDefinitionKey);
         if (!newestProcessDefinition.isPresent()) {
         	migratorLogger.logNoProcessInstancesDeployedWithKey(processDefinitionKey);
         } else if (!newestProcessDefinition.get().getProcessVersion().isPresent()) {
@@ -126,17 +129,6 @@ public class ProcessInstanceMigrator {
                     String businessKeys = instances.stream().map(instance -> instance.getBusinessKey()).collect(Collectors.joining(","));
                     migratorLogger.logProcessInstancesInfo(processDefinitionId, processDefinition.getVersionTag(), instances.size(), businessKeys);
         });
-    }
-
-    private Optional<VersionedDefinitionId> getNewestDeployedVersion(String processDefinitionKey) {
-        ProcessDefinition latestProcessDefinition = processEngine.getRepositoryService().createProcessDefinitionQuery()
-                .processDefinitionKey(processDefinitionKey)
-                .latestVersion()
-                .active()
-                .singleResult();
-
-        return Optional.ofNullable(latestProcessDefinition).map(processDefinition ->
-                    new VersionedDefinitionId(ProcessVersion.fromString(processDefinition.getVersionTag()), processDefinition.getId()));
     }
 
 }
