@@ -18,13 +18,13 @@
 		limitations under the License.
 	-->
 	
-	<groupId>info.novatec</groupId>
+	<groupId>de.envite.bpm</groupId>
 	<artifactId>camunda-process-instance-migrator</artifactId>
 	<version>1.1.1-SNAPSHOT</version>
 
 	<name>Camunda Process Instance Migrator</name>
 	<description>Process Instance Migrator for Camunda BPM</description>
-	<url>https://github.com/NovatecConsulting/camunda-process-instance-migrator</url>
+	<url>https://github.com/envite-consulting/camunda-process-instance-migrator</url>
 	
 	<licenses>
 		<license>
@@ -36,9 +36,9 @@
 	</licenses>
 	
 	<scm>
-		<url>https://github.com/NovatecConsulting/camunda-process-instance-migrator</url>
-		<connection>scm:git:git:/github.com/NovatecConsulting/camunda-process-instance-migrator.git</connection>
-		<developerConnection>scm:git:git@github.com:NovatecConsulting/camunda-process-instance-migrator.git</developerConnection>
+		<url>https://github.com/envite-consulting/camunda-process-instance-migrator</url>
+		<connection>scm:git:git:/github.com/envite-consulting/camunda-process-instance-migrator.git</connection>
+		<developerConnection>scm:git:git@github.com:envite-consulting/camunda-process-instance-migrator.git</developerConnection>
 		<tag>1.0.0</tag>
 	</scm>
 	
@@ -56,10 +56,14 @@
 	</distributionManagement>
 		
 	<properties>
-		<camunda.version>7.16.0</camunda.version>
+		<camunda.version>7.23.0</camunda.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>		
+
+    <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.sources>src/main/java</sonar.sources>
+    <sonar.tests>src/test/java</sonar.tests>
 	</properties>
 	
 	<dependencies>
@@ -102,7 +106,7 @@
 		<dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.18</version>
+            <version>1.18.40</version>
             <scope>provided</scope>            
         </dependency>
 	</dependencies>
@@ -120,6 +124,15 @@
 		</resources>
 
 		<plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.0</version>
+        <configuration>
+          <release>21</release>
+        </configuration>
+      </plugin>
+
 			<!-- Optional: ensure the manifest contains artifact version information: -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -247,9 +260,25 @@
 			<id>BenFuernrohr</id>
 			<name>Benjamin Fuernrohr</name>
 			<email>Benjamin.Fuernrohr@novatec-consulting.de</email>
-			<organization>Nocatec Consulting GmbH</organization>
-			<organizationUrl>https://www.novatec-gmbh.de/</organizationUrl>
+			<organization>Novatec Consulting GmbH</organization>
+			<organizationUrl>http://www.novatec-gmbh.de/</organizationUrl>
 			<url>https://github.com/NovatecConsulting</url>
 		</developer>
+    <developer>
+      <id>CRoberto1926</id>
+      <name>Roberto Cortini</name>
+      <email>roberto.cortini@envite.de</email>
+      <organization>envite consulting GmbH</organization>
+      <organizationUrl>https://envite.de/</organizationUrl>
+      <url>https://github.com/envite-consulting</url>
+    </developer>
+    <developer>
+      <id>nyuuyn</id>
+      <name>Kálmán Képes</name>
+      <email>kalman.kepes@envite.de</email>
+      <organization>envite consulting GmbH</organization>
+      <organizationUrl>https://envite.de/</organizationUrl>
+      <url>https://github.com/envite-consulting</url>
+    </developer>
 	</developers>
 </project>
