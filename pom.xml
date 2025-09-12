@@ -99,7 +99,7 @@
 			<groupId>org.camunda.bpm.extension.mockito</groupId>
 			<artifactId>camunda-bpm-mockito</artifactId>
 			<scope>test</scope>
-			<version>4.13.0</version>
+			<version>5.16.0</version>
 		</dependency>
 		
 		<!-- Project Lombok requires IDE extension! -->
