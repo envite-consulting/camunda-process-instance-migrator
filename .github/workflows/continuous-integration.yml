@@ -101,10 +101,6 @@ jobs:
     name: Release artifacts to Sonatype-Central
     if: github.repository == 'envite-consulting/camunda-process-instance-migrator' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
     needs: [ test ]
-    # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
-    # we should execute this command before interacting with gpg (otherwise gpg won't work)
-    env:
-      GPG_TTY: $(tty)
     steps:
       - name: Git checkout
         uses: actions/checkout@v5
