@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ExistingInstancesLoggingData {
 
-	private String processDefinitionId;
-	private String versionTag;
-	private int numberOfInstances;
-	private String businessKeyListString;
+  private String processDefinitionId;
+  private String versionTag;
+  private int numberOfInstances;
+  private String businessKeyListString;
 }
