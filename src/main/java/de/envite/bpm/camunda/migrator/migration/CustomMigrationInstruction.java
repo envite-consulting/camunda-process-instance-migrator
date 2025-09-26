@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class CustomMigrationInstruction {
-	private String sourceActivityId;
-	private String targetActivityId;
-	private boolean updateEventTrigger;
+  private String sourceActivityId;
+  private String targetActivityId;
+  private boolean updateEventTrigger;
 }

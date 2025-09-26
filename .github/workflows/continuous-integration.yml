@@ -42,6 +42,8 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
+      - name: Spotless Format Check
+        run: mvn spotless:check
       - name: Compile & build
         run: mvn -B install -DskipTests -Djacoco.skip
       - name: Populate cache
