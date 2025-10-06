@@ -41,11 +41,14 @@ First, add the dependency:
 ```xml
 
 <dependency>
-  <groupId>de.envite</groupId>
+  <groupId>de.envite.bpm</groupId>
   <artifactId>camunda-process-instance-migrator</artifactId>
-  <version>1.1.0</version>
+  <version>2.0.0</version>
 </dependency>
 ```
+
+Please check https://central.sonatype.com/artifact/de.envite.bpm/camunda-process-instance-migrator
+for updated versions of the dependency.
 
 Secondly, initialize the migrator by injecting Camunda's ProcessEngine. As long as you're only
 migrating on the patch level and don't need to do minor migrations, there is no need for further
@@ -174,13 +177,13 @@ of Camunda Platform.
 Requires Java 8.
 
 There are also no restrictions to the specifiable migration instructions for minor migrations,
-unlike in the migration wizard of Camundas EE Cockpit. So this migrator will not prevent you from
+unlike in the migration wizard of Camunda's EE Cockpit. So this migrator will not prevent you from
 trying to migrate activities to different types of activities (i.e. from waitstates to
 non-waitstates or from receive tasks to user tasks). This might, however, result in undefined states
 and has not been tested whatsoever. So handle with care!
 
 Operations that go beyond migration, like Process Instance Modifications or the setting of variables
-upon migration are also not implemented as of yet.
+upon migration are also not implemented yet.
 
 ## What else do I need to know?
 
@@ -189,7 +192,7 @@ may take several minutes. So it is advisable to carry out the migration asynchro
 
 Secondly, the migrator was built to be robust and informative. Any action the migrator takes will be
 logged, and any issue that may come up during migration, will just cause the migration of that
-specific process instance to fail and be logged accordingly. So it is adviced to check your logs
+specific process instance to fail and be logged accordingly. So it is advised to check your logs
 after each migration for faulty process instances. It is very rare that a migration attempt fails,
 but when it does, you may want to correct it manually.
 
