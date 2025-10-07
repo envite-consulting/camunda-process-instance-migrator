@@ -19,6 +19,7 @@ import de.envite.bpm.camunda.migrator.processmetadata.LoadProcessDefinitionKeys;
 import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -35,6 +36,7 @@ import lombok.RequiredArgsConstructor;
  * </ul>
  */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class ProcessInstanceMigrator {
 
   private final GetOlderProcessInstances getOlderProcessInstances;
