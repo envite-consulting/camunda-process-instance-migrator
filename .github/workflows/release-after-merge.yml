@@ -1,0 +1,125 @@
+name: Release after merge (release/* -> master)
+
+on:
+  pull_request:
+    types: [ closed ]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Finalize release and tag
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'master' &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-22.04
+
+    env:
+      JAVA_VERSION: 17
+      GIT_USER_NAME: github-actions[bot]
+      GIT_USER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Configure git
+        run: |
+          git config user.name  "${GIT_USER_NAME}"
+          git config user.email "${GIT_USER_EMAIL}"
+
+      - name: Read current Maven version from pom.xml
+        id: mvnver
+        run: |
+          VER=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:3.5.0:exec)
+          echo "current_version=$VER" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: pom.xml must end with -SNAPSHOT before release
+        run: |
+          CUR="${{ steps.mvnver.outputs.current_version }}"
+          if [[ "$CUR" != *-SNAPSHOT ]]; then
+            echo "::error title=Version not SNAPSHOT::Expected pom.xml version to end with '-SNAPSHOT' but found '$CUR'."
+            echo "This likely means the project was already released/tagged. Aborting."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Compute release and next snapshot versions
+        id: versions
+        run: |
+          CUR="${{ steps.mvnver.outputs.current_version }}"
+          REL="${CUR%-SNAPSHOT}"
+          IFS='.' read -r MA MI PA <<<"${REL}"
+          PA="${PA%%[^0-9]*}"
+          NEXT_PATCH=$((PA + 1))
+          NEXT="${MA}.${MI}.${NEXT_PATCH}-SNAPSHOT"
+          echo "release_version=$REL" >> "$GITHUB_OUTPUT"
+          echo "next_snapshot_version=$NEXT" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: tag must not already exist
+        run: |
+          TAG="v${{ steps.versions.outputs.release_version }}"
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error title=Tag exists locally::$TAG already exists locally."
+            exit 1
+          fi
+          if git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
+            echo "::error title=Tag exists on remote::$TAG already exists on origin."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Set release version in pom.xml (remove -SNAPSHOT)
+        run: |
+          mvn -B versions:set -DnewVersion="${{ steps.versions.outputs.release_version }}" -DgenerateBackupPoms=false
+          git add pom.xml
+          git commit -m "chore(release): set version ${{ steps.versions.outputs.release_version }}"
+
+      - name: Tag release and push to master
+        run: |
+          TAG="v${{ steps.versions.outputs.release_version }}"
+          git push origin HEAD:master
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.versions.outputs.release_version }}
+          name: v${{ steps.versions.outputs.release_version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge master back to develop and bump next -SNAPSHOT
+        run: |
+          git fetch origin develop:develop
+          git checkout develop
+          git merge --no-edit origin/master || { echo "::error title=Merge conflict::Manual resolution required."; exit 1; }
+          mvn -B versions:set -DnewVersion="${{ steps.versions.outputs.next_snapshot_version }}" -DgenerateBackupPoms=false
+          git add pom.xml
+          git commit -m "chore(release): bump to ${{ steps.versions.outputs.next_snapshot_version }} on develop"
+          git push origin HEAD:develop
+
+      - name: Summary
+        run: |
+          echo "Released v${{ steps.versions.outputs.release_version }}"
+          echo "Next development version on develop: ${{ steps.versions.outputs.next_snapshot_version }}"
