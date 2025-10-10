@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  JAVA_VERSION: 21
+  JAVA_VERSION: 17
 
   ARTIFACTS_JARS_NAME: camunda-process-instance-migrator-jars
   ARTIFACTS_JARS_PATH: ~/.m2/repository/de/envite/bpm
