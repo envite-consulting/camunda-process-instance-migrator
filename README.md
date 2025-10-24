@@ -110,7 +110,7 @@ public class MigratorConfiguration {
         .build();
   }
 
-  private MigrationInstructions generateMigrationInstructions() {
+  private GetMigrationInstructions generateMigrationInstructions() {
     //use the prepared way of specifying instructions or implement your own
     return new MigrationInstructionsDefaultImpl()
         .putInstructions("Some_process_definition_key", Arrays.asList(
