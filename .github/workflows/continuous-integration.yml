@@ -52,7 +52,7 @@ jobs:
           mvn -B dependency:go-offline
           mvn -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_JARS_NAME }}
           path: ${{ env.ARTIFACTS_JARS_PATH }}
@@ -89,7 +89,7 @@ jobs:
       - name: Test
         run: mvn -B verify -Dcheckstyle.skip
       - name: Upload JaCoCo Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
