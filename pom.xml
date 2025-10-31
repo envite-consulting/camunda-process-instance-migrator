@@ -45,7 +45,7 @@
 	<properties>
 		<camunda.version>7.24.0</camunda.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
