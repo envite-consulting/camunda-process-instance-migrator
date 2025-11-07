@@ -8,6 +8,7 @@ import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingDataDefaultImpl;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
 import de.envite.bpm.camunda.migrator.logging.MigratorLoggerDefaultImpl;
+import de.envite.bpm.camunda.migrator.meta.infrastructure.ExcludeFromJacocoGeneratedReport;
 import de.envite.bpm.camunda.migrator.migration.PerformMigration;
 import de.envite.bpm.camunda.migrator.migration.PerformMigrationDefaultImpl;
 import de.envite.bpm.camunda.migrator.plan.CreatePatchMigrationplan;
@@ -25,6 +26,8 @@ import org.camunda.bpm.engine.ProcessEngine;
  * configuration object if no further configuration is specified.
  */
 @NoArgsConstructor
+// TODO: Write Tests and remove Annotation
+@ExcludeFromJacocoGeneratedReport
 public class ProcessInstanceMigratorBuilder {
 
   private GetOlderProcessInstances getOlderProcessInstancesToSet;
