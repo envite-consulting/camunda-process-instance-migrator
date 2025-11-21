@@ -98,13 +98,13 @@
 		    <version>15.0.0</version>
 		    <scope>test</scope>
 		</dependency>
-	
-		<dependency>
-			<groupId>org.camunda.bpm.extension.mockito</groupId>
-			<artifactId>camunda-bpm-mockito</artifactId>
-			<scope>test</scope>
-			<version>5.16.0</version>
-		</dependency>
+
+        <dependency>
+            <groupId>org.camunda.community.mockito</groupId>
+            <artifactId>camunda-platform-7-mockito</artifactId>
+            <scope>test</scope>
+            <version>${camunda.version}</version>
+        </dependency>
 		
 		<!-- Project Lombok requires IDE extension! -->
 		<dependency>
