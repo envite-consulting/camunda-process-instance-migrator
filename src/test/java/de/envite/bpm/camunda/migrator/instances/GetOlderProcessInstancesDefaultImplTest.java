@@ -2,8 +2,8 @@ package de.envite.bpm.camunda.migrator.instances;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.camunda.bpm.extension.mockito.QueryMocks.mockProcessDefinitionQuery;
-import static org.camunda.bpm.extension.mockito.QueryMocks.mockProcessInstanceQuery;
+import static org.camunda.community.mockito.QueryMocks.mockProcessDefinitionQuery;
+import static org.camunda.community.mockito.QueryMocks.mockProcessInstanceQuery;
 import static org.mockito.Mockito.when;
 
 import de.envite.bpm.camunda.migrator.ProcessVersion;
