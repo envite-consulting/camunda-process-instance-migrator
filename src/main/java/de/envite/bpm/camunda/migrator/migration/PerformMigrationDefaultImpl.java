@@ -37,7 +37,6 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
     } else {
       migrationExecution.execute();
     }
-
   }
 
   private MigrationPlan mapToCamunda7MigrationPlan(CustomMigrationPlan plan) {
