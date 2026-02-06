@@ -8,21 +8,26 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
 
-/** Default implementation for {@link GetMigrationInstructions}. */
+/** Default implementation for {@link MigrationInstructions}. */
 @Getter
-public class MigrationInstructionsMap implements GetMigrationInstructions {
+public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
 
   private Map<String, List<MinorMigrationInstructions>> migrationInstructionMap;
 
-  public MigrationInstructionsMap() {
+  private Map<String, Boolean> skipCustomListenersMap;
+  private Map<String, Boolean> skipIoMappingsMap;
+
+  public MigrationInstructionsDefaultImpl() {
     this.migrationInstructionMap = new HashMap<>();
+    this.skipCustomListenersMap = new HashMap<>();
+    this.skipIoMappingsMap = new HashMap<>();
   }
 
   public void clearInstructions() {
     this.migrationInstructionMap = new HashMap<>();
   }
 
-  public MigrationInstructionsMap putInstructions(
+  public MigrationInstructionsDefaultImpl putInstructions(
       String processDefinitionKey, List<MinorMigrationInstructions> instructions) {
     if (migrationInstructionMap.containsKey(processDefinitionKey)) {
       migrationInstructionMap.get(processDefinitionKey).addAll(instructions);
@@ -30,6 +35,16 @@ public class MigrationInstructionsMap implements GetMigrationInstructions {
       // generate new ArrayList to guarantee support for structural modification (i.e. add)
       migrationInstructionMap.put(processDefinitionKey, new ArrayList<>(instructions));
     }
+    return this;
+  }
+
+  public MigrationInstructionsDefaultImpl putSkipCustomListeners(String processDefinitionKey, boolean skipCustomListeners) {
+    skipCustomListenersMap.put(processDefinitionKey, skipCustomListeners);
+    return this;
+  }
+
+  public MigrationInstructionsDefaultImpl putSkipIoMappings(String processDefinitionKey, boolean skipIoMappings) {
+    skipIoMappingsMap.put(processDefinitionKey, skipIoMappings);
     return this;
   }
 
@@ -44,11 +59,29 @@ public class MigrationInstructionsMap implements GetMigrationInstructions {
           .filter(
               minorMigrationInstructions ->
                   minorMigrationInstructions.getTargetMinorVersion() <= targetMinorVersion
-                      && minorMigrationInstructions.getSourceMinorVersion() >= sourceMinorVersion
-                      && minorMigrationInstructions.getMajorVersion() == majorVersion)
+                  && minorMigrationInstructions.getSourceMinorVersion() >= sourceMinorVersion
+                  && minorMigrationInstructions.getMajorVersion() == majorVersion)
           .collect(Collectors.toList());
     } else {
       return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public boolean skipCustomListeners(String processDefinitionKey) {
+    if (skipCustomListenersMap.containsKey(processDefinitionKey)) {
+      return skipCustomListenersMap.get(processDefinitionKey);
+    } else {
+      return true;
+    }
+  }
+
+  @Override
+  public boolean skipIoMappings(String processDefinitionKey) {
+    if (skipIoMappingsMap.containsKey(processDefinitionKey)) {
+      return skipIoMappingsMap.get(processDefinitionKey);
+    } else {
+      return true;
     }
   }
 }
