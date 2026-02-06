@@ -16,11 +16,13 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
 
   private Map<String, Boolean> skipCustomListenersMap;
   private Map<String, Boolean> skipIoMappingsMap;
+  private Map<String, Boolean> executeAsyncMap;
 
   public MigrationInstructionsDefaultImpl() {
     this.migrationInstructionMap = new HashMap<>();
     this.skipCustomListenersMap = new HashMap<>();
     this.skipIoMappingsMap = new HashMap<>();
+    this.executeAsyncMap = new HashMap<>();
   }
 
   public void clearInstructions() {
@@ -87,4 +89,14 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
       return true;
     }
   }
+
+  @Override
+  public boolean executeAsync(String processDefinitionKey) {
+    if (executeAsyncMap.containsKey(processDefinitionKey)) {
+      return executeAsyncMap.get(processDefinitionKey);
+    } else {
+      return false;
+    }
+  }
+
 }
