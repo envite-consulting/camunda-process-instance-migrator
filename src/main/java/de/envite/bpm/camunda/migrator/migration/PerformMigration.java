@@ -10,5 +10,9 @@ public interface PerformMigration {
    * @param skipCustomListeners whether to skip custom listeners during migration.
    * @param skipIoMappings whether to skip IO mappings during migration.
    */
-  void forPlanAndProcessInstanceId(CustomMigrationPlan plan, String processInstanceId, boolean skipCustomListeners, boolean skipIoMappings);
+  void forPlanAndProcessInstanceId(
+      CustomMigrationPlan plan,
+      String processInstanceId,
+      boolean skipCustomListeners,
+      boolean skipIoMappings);
 }

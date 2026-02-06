@@ -2,8 +2,8 @@ package de.envite.bpm.camunda.migrator;
 
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
 import de.envite.bpm.camunda.migrator.instances.VersionedProcessInstance;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionCombiner;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsAdder;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
 import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
@@ -80,7 +80,8 @@ public class ProcessInstanceMigrator {
 
       for (VersionedProcessInstance processInstance : olderProcessInstances) {
         CustomMigrationPlan migrationPlan = null;
-        boolean skipCustomListeners = getMigrationInstructions.skipCustomListeners(processDefinitionKey);
+        boolean skipCustomListeners =
+            getMigrationInstructions.skipCustomListeners(processDefinitionKey);
         boolean skipIoMappings = getMigrationInstructions.skipIoMappings(processDefinitionKey);
         if (processInstance.getProcessVersion().isOlderPatchThan(newestProcessVersion)) {
           migrationPlan =
@@ -91,7 +92,7 @@ public class ProcessInstanceMigrator {
               createPatchMigrationplan.migrationPlanByMappingEqualActivityIDs(
                   newestProcessDefinition.get(), processInstance);
 
-                  List<MinorMigrationInstructions> applicableMinorMigrationInstructions =
+          List<MinorMigrationInstructions> applicableMinorMigrationInstructions =
               getMigrationInstructions.getApplicableMinorMigrationInstructions(
                   processDefinitionKey,
                   processInstance.getProcessVersion().getMinorVersion(),
@@ -108,7 +109,10 @@ public class ProcessInstanceMigrator {
         if (migrationPlan != null) {
           try {
             performMigration.forPlanAndProcessInstanceId(
-                migrationPlan, processInstance.getProcessInstanceId(), skipCustomListeners, skipIoMappings);
+                migrationPlan,
+                processInstance.getProcessInstanceId(),
+                skipCustomListeners,
+                skipIoMappings);
             migratorLogger.logMigrationSuccessful(
                 processInstance.getProcessInstanceId(), processInstance.getBusinessKey(),
                 processInstance.getProcessVersion().toVersionTag(),

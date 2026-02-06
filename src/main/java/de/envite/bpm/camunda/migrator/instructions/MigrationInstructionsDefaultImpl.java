@@ -32,18 +32,21 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
     if (migrationInstructionMap.containsKey(processDefinitionKey)) {
       migrationInstructionMap.get(processDefinitionKey).addAll(instructions);
     } else {
-      // generate new ArrayList to guarantee support for structural modification (i.e. add)
+      // generate new ArrayList to guarantee support for structural modification (i.e.
+      // add)
       migrationInstructionMap.put(processDefinitionKey, new ArrayList<>(instructions));
     }
     return this;
   }
 
-  public MigrationInstructionsDefaultImpl putSkipCustomListeners(String processDefinitionKey, boolean skipCustomListeners) {
+  public MigrationInstructionsDefaultImpl putSkipCustomListeners(
+      String processDefinitionKey, boolean skipCustomListeners) {
     skipCustomListenersMap.put(processDefinitionKey, skipCustomListeners);
     return this;
   }
 
-  public MigrationInstructionsDefaultImpl putSkipIoMappings(String processDefinitionKey, boolean skipIoMappings) {
+  public MigrationInstructionsDefaultImpl putSkipIoMappings(
+      String processDefinitionKey, boolean skipIoMappings) {
     skipIoMappingsMap.put(processDefinitionKey, skipIoMappings);
     return this;
   }
@@ -59,8 +62,8 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
           .filter(
               minorMigrationInstructions ->
                   minorMigrationInstructions.getTargetMinorVersion() <= targetMinorVersion
-                  && minorMigrationInstructions.getSourceMinorVersion() >= sourceMinorVersion
-                  && minorMigrationInstructions.getMajorVersion() == majorVersion)
+                      && minorMigrationInstructions.getSourceMinorVersion() >= sourceMinorVersion
+                      && minorMigrationInstructions.getMajorVersion() == majorVersion)
           .collect(Collectors.toList());
     } else {
       return Collections.emptyList();
