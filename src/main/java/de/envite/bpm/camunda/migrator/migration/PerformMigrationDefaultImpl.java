@@ -13,12 +13,16 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
   private final ProcessEngine processEngine;
 
   @Override
-  public void forPlanAndProcessInstanceId(CustomMigrationPlan plan, String processInstanceId,
-      boolean skipCustomListeners, boolean skipIoMappings) {
-    var migrationExecution = processEngine
-        .getRuntimeService()
-        .newMigration(mapToCamunda7MigrationPlan(plan))
-        .processInstanceIds(processInstanceId);
+  public void forPlanAndProcessInstanceId(
+      CustomMigrationPlan plan,
+      String processInstanceId,
+      boolean skipCustomListeners,
+      boolean skipIoMappings) {
+    var migrationExecution =
+        processEngine
+            .getRuntimeService()
+            .newMigration(mapToCamunda7MigrationPlan(plan))
+            .processInstanceIds(processInstanceId);
 
     if (skipCustomListeners) {
       migrationExecution.skipCustomListeners();
@@ -31,14 +35,16 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
   }
 
   private MigrationPlan mapToCamunda7MigrationPlan(CustomMigrationPlan plan) {
-    MigrationPlanImpl migrationPlan = new MigrationPlanImpl(
-        plan.getSourceProcessDefinitionId(), plan.getTargetProcessDefinitionId());
+    MigrationPlanImpl migrationPlan =
+        new MigrationPlanImpl(
+            plan.getSourceProcessDefinitionId(), plan.getTargetProcessDefinitionId());
     migrationPlan.setInstructions(
         plan.getInstructions().stream()
             .map(
                 instruction -> {
-                  MigrationInstructionImpl migrationInstructionImpl = new MigrationInstructionImpl(
-                      instruction.getSourceActivityId(), instruction.getTargetActivityId());
+                  MigrationInstructionImpl migrationInstructionImpl =
+                      new MigrationInstructionImpl(
+                          instruction.getSourceActivityId(), instruction.getTargetActivityId());
                   migrationInstructionImpl.setUpdateEventTrigger(
                       instruction.isUpdateEventTrigger());
                   return migrationInstructionImpl;
