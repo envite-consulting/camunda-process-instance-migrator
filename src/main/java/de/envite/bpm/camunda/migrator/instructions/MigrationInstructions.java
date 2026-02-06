@@ -24,4 +24,6 @@ public interface MigrationInstructions {
   public boolean skipCustomListeners(String processDefinitionKey);
 
   public boolean skipIoMappings(String processDefinitionKey);
+
+  public boolean executeAsync(String processDefinitionKey);
 }

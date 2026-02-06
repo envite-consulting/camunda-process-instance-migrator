@@ -14,5 +14,6 @@ public interface PerformMigration {
       CustomMigrationPlan plan,
       String processInstanceId,
       boolean skipCustomListeners,
-      boolean skipIoMappings);
+      boolean skipIoMappings,
+      boolean executeAsync);
 }

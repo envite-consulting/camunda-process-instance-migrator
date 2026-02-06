@@ -17,7 +17,8 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
       CustomMigrationPlan plan,
       String processInstanceId,
       boolean skipCustomListeners,
-      boolean skipIoMappings) {
+      boolean skipIoMappings,
+      boolean executeAsync) {
     var migrationExecution =
         processEngine
             .getRuntimeService()
@@ -31,7 +32,12 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
       migrationExecution.skipIoMappings();
     }
 
-    migrationExecution.execute();
+    if (executeAsync) {
+      migrationExecution.executeAsync();
+    } else {
+      migrationExecution.execute();
+    }
+
   }
 
   private MigrationPlan mapToCamunda7MigrationPlan(CustomMigrationPlan plan) {

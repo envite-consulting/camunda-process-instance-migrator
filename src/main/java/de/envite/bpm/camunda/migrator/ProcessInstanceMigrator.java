@@ -83,6 +83,7 @@ public class ProcessInstanceMigrator {
         boolean skipCustomListeners =
             getMigrationInstructions.skipCustomListeners(processDefinitionKey);
         boolean skipIoMappings = getMigrationInstructions.skipIoMappings(processDefinitionKey);
+        boolean executeAsync = getMigrationInstructions.executeAsync(processDefinitionKey);
         if (processInstance.getProcessVersion().isOlderPatchThan(newestProcessVersion)) {
           migrationPlan =
               createPatchMigrationplan.migrationPlanByMappingEqualActivityIDs(
@@ -112,7 +113,8 @@ public class ProcessInstanceMigrator {
                 migrationPlan,
                 processInstance.getProcessInstanceId(),
                 skipCustomListeners,
-                skipIoMappings);
+                skipIoMappings,
+                executeAsync);
             migratorLogger.logMigrationSuccessful(
                 processInstance.getProcessInstanceId(), processInstance.getBusinessKey(),
                 processInstance.getProcessVersion().toVersionTag(),
