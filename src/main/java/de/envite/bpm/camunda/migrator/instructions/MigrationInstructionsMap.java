@@ -1,6 +1,5 @@
 package de.envite.bpm.camunda.migrator.instructions;
 
-import de.envite.bpm.camunda.migrator.meta.infrastructure.ExcludeFromJacocoGeneratedReport;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,8 +10,6 @@ import lombok.Getter;
 
 /** Default implementation for {@link GetMigrationInstructions}. */
 @Getter
-// TODO: Write Tests and remove Annotation
-@ExcludeFromJacocoGeneratedReport
 public class MigrationInstructionsMap implements GetMigrationInstructions {
 
   private Map<String, List<MinorMigrationInstructions>> migrationInstructionMap;
