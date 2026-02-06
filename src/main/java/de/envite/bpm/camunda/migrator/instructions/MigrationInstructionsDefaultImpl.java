@@ -98,5 +98,4 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
       return false;
     }
   }
-
 }
