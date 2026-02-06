@@ -100,13 +100,13 @@
 		    <version>15.0.0</version>
 		    <scope>test</scope>
 		</dependency>
-	
-		<dependency>
-			<groupId>org.camunda.bpm.extension.mockito</groupId>
-			<artifactId>camunda-bpm-mockito</artifactId>
-			<scope>test</scope>
-			<version>5.16.0</version>
-		</dependency>
+
+        <dependency>
+            <groupId>org.camunda.community.mockito</groupId>
+            <artifactId>camunda-platform-7-mockito</artifactId>
+            <scope>test</scope>
+            <version>${camunda.version}</version>
+        </dependency>
 		
 		<!-- Project Lombok requires IDE extension! -->
 		<dependency>
@@ -133,7 +133,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.14.1</version>
+        <version>3.15.0</version>
         <configuration>
           <release>17</release>
           <annotationProcessorPaths>
@@ -150,7 +150,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.4.2</version>
+				<version>3.5.0</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -165,7 +165,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.0</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -196,7 +196,7 @@
             <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.2.1</version>
         <configuration>
           <java>
             <googleJavaFormat>
@@ -281,7 +281,7 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.9.0</version>
+            <version>0.10.0</version>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
@@ -327,7 +327,7 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.9.0</version>
+            <version>0.10.0</version>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>

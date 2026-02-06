@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
@@ -37,7 +37,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
@@ -52,7 +52,7 @@ jobs:
           mvn -B dependency:go-offline
           mvn -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACTS_JARS_NAME }}
           path: ${{ env.ARTIFACTS_JARS_PATH }}
@@ -69,27 +69,27 @@ jobs:
     needs: [ compile ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JARS_NAME }}
           path: ${{ env.ARTIFACTS_JARS_PATH }}
       - name: Test
         run: mvn -B verify -Dcheckstyle.skip
       - name: Upload JaCoCo Report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
@@ -109,20 +109,20 @@ jobs:
       GPG_TTY: $(tty)
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JARS_NAME }}
           path: ${{ env.ARTIFACTS_JARS_PATH }}
@@ -155,7 +155,7 @@ jobs:
     needs: [ test ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -164,19 +164,19 @@ jobs:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-*
           merge-multiple: true
