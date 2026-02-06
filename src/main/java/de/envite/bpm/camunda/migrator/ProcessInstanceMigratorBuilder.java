@@ -2,8 +2,8 @@ package de.envite.bpm.camunda.migrator;
 
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstancesDefaultImpl;
-import de.envite.bpm.camunda.migrator.instructions.GetMigrationInstructions;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsMap;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingDataDefaultImpl;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
@@ -30,7 +30,7 @@ public class ProcessInstanceMigratorBuilder {
   private GetOlderProcessInstances getOlderProcessInstancesToSet;
   private CreatePatchMigrationplan createPatchMigrationplanToSet;
   private MigratorLogger migratorLoggerToSet;
-  private GetMigrationInstructions getMigrationInstructionsToSet;
+  private MigrationInstructions getMigrationInstructionsToSet;
   private PerformMigration performMigration;
   private LoadProcessDefinitionKeys loadProcessDefinitionKeys;
   private LoadNewestDeployedVersion loadNewestDeployedVersion;
@@ -47,7 +47,7 @@ public class ProcessInstanceMigratorBuilder {
       this.migratorLoggerToSet = new MigratorLoggerDefaultImpl();
     }
     if (getMigrationInstructionsToSet == null) {
-      this.getMigrationInstructionsToSet = new MigrationInstructionsMap();
+      this.getMigrationInstructionsToSet = new MigrationInstructionsDefaultImpl();
     }
     if (performMigration == null) {
       this.performMigration = new PerformMigrationDefaultImpl(processEngine);
@@ -83,7 +83,7 @@ public class ProcessInstanceMigratorBuilder {
   }
 
   public ProcessInstanceMigratorBuilder withGetMigrationInstructions(
-      GetMigrationInstructions getMigrationInstructions) {
+      MigrationInstructions getMigrationInstructions) {
     this.getMigrationInstructionsToSet = getMigrationInstructions;
     return this;
   }

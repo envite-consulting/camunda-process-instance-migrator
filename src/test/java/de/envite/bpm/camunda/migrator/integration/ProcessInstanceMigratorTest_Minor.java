@@ -17,7 +17,7 @@ import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.task;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
 
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigrator;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsMap;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
 import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,7 +51,7 @@ class ProcessInstanceMigratorTest_Minor {
   private static final ProcessEngineExtension extension =
       ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
 
-  private final MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+  private final MigrationInstructionsDefaultImpl migrationInstructionsMap = new MigrationInstructionsDefaultImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
       ProcessInstanceMigrator.builder()
           .ofProcessEngine(processEngine())
