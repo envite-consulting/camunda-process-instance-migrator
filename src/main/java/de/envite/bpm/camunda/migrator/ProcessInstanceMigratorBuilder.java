@@ -30,7 +30,7 @@ public class ProcessInstanceMigratorBuilder {
   private GetOlderProcessInstances getOlderProcessInstancesToSet;
   private CreatePatchMigrationplan createPatchMigrationplanToSet;
   private MigratorLogger migratorLoggerToSet;
-  private MigrationInstructions getMigrationInstructionsToSet;
+  private MigrationInstructions migrationInstructionsToSet;
   private PerformMigration performMigration;
   private LoadProcessDefinitionKeys loadProcessDefinitionKeys;
   private LoadNewestDeployedVersion loadNewestDeployedVersion;
@@ -46,8 +46,8 @@ public class ProcessInstanceMigratorBuilder {
     if (migratorLoggerToSet == null) {
       this.migratorLoggerToSet = new MigratorLoggerDefaultImpl();
     }
-    if (getMigrationInstructionsToSet == null) {
-      this.getMigrationInstructionsToSet = new MigrationInstructionsDefaultImpl();
+    if (migrationInstructionsToSet == null) {
+      this.migrationInstructionsToSet = new MigrationInstructionsDefaultImpl();
     }
     if (performMigration == null) {
       this.performMigration = new PerformMigrationDefaultImpl(processEngine);
@@ -84,7 +84,7 @@ public class ProcessInstanceMigratorBuilder {
 
   public ProcessInstanceMigratorBuilder withGetMigrationInstructions(
       MigrationInstructions getMigrationInstructions) {
-    this.getMigrationInstructionsToSet = getMigrationInstructions;
+    this.migrationInstructionsToSet = getMigrationInstructions;
     return this;
   }
 
@@ -111,7 +111,7 @@ public class ProcessInstanceMigratorBuilder {
         getOlderProcessInstancesToSet,
         createPatchMigrationplanToSet,
         migratorLoggerToSet,
-        getMigrationInstructionsToSet,
+        migrationInstructionsToSet,
         performMigration,
         loadProcessDefinitionKeys,
         loadNewestDeployedVersion,
