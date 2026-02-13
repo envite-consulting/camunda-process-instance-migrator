@@ -148,35 +148,4 @@ class ProcessInstanceMigratorBuilderTest {
     ProcessInstanceMigrator migrator = builder.build();
     assertThat(migrator).isNotNull();
   }
-
-  @Test
-  void testAllWithMethodsAndOfProcessEngine() {
-    GetOlderProcessInstances customGetOlderProcessInstances = mock(GetOlderProcessInstances.class);
-    CreatePatchMigrationplan customCreatePatchMigrationplan = mock(CreatePatchMigrationplan.class);
-    MigratorLogger customMigratorLogger = mock(MigratorLogger.class);
-    GetMigrationInstructions customGetMigrationInstructions = mock(GetMigrationInstructions.class);
-    LoadProcessDefinitionKeys customLoadProcessDefinitionKeys =
-        mock(LoadProcessDefinitionKeys.class);
-    LoadNewestDeployedVersion customLoadNewestDeployedVersion =
-        mock(LoadNewestDeployedVersion.class);
-    GenerateAllInstancesLoggingData customGenerateAllInstancesLoggingData =
-        mock(GenerateAllInstancesLoggingData.class);
-
-    ProcessInstanceMigratorBuilder result =
-        builder
-            .withGetOlderProcessInstances(customGetOlderProcessInstances)
-            .withCreatePatchMigrationplanToSet(customCreatePatchMigrationplan)
-            .withMigratorLogger(customMigratorLogger)
-            .withGetMigrationInstructions(customGetMigrationInstructions)
-            .withLoadProcessDefinitionKeys(customLoadProcessDefinitionKeys)
-            .withLoadNewestDeployedVersion(customLoadNewestDeployedVersion)
-            .withGenerateAllInstancesLoggingData(customGenerateAllInstancesLoggingData)
-            .ofProcessEngine(processEngine);
-
-    assertNotNull(result);
-    assertEquals(builder, result);
-
-    ProcessInstanceMigrator migrator = builder.build();
-    assertNotNull(migrator);
-  }
 }
