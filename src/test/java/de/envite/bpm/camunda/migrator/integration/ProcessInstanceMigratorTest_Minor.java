@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.AbstractAssertions.processEngine;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.task;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.engine.runtime.Job;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.junit5.ProcessEngineExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -80,6 +82,11 @@ class ProcessInstanceMigratorTest_Minor {
   void cleanUp() {
     runtimeService().deleteProcessInstance(processInstance1.getId(), "noReason");
     runtimeService().deleteProcessInstance(processInstance2.getId(), "noReason");
+
+    managementService()
+        .createBatchQuery()
+        .list()
+        .forEach(batch -> managementService().deleteBatch(batch.getId(), true));
 
     repositoryService()
         .createDeploymentQuery()
@@ -301,6 +308,80 @@ class ProcessInstanceMigratorTest_Minor {
         .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
         .allTasksHaveKey("UserTask7")
         .numberOfTasksIs(2);
+  }
+
+  @Test
+  void
+      processInstanceMigrator_should_migrate_minor_with_custom_listeners_and_io_mappings_not_skipped() {
+    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
+    newestProcessDefinitionAfterRedeployment =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
+    migrationInstructionsDefaultImpl.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
+    migrationInstructionsDefaultImpl.putSkipIoMappings(PROCESS_DEFINITION_KEY, false);
+
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(getCurrentTasks(PROCESS_DEFINITION_KEY, taskService()))
+        .numberOfTasksIs(2)
+        .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
+        .allTasksHaveKey("UserTask2")
+        .allTasksHaveFormkey("Formkey2");
+  }
+
+  @Test
+  void processInstanceMigrator_should_migrate_minor_async() {
+    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
+    newestProcessDefinitionAfterRedeployment =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
+    migrationInstructionsDefaultImpl.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
+
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    managementService()
+        .createBatchQuery()
+        .list()
+        .forEach(
+            batch -> {
+              Job seedJob =
+                  managementService()
+                      .createJobQuery()
+                      .jobDefinitionId(batch.getSeedJobDefinitionId())
+                      .singleResult();
+              managementService().executeJob(seedJob.getId());
+
+              managementService()
+                  .createJobQuery()
+                  .jobDefinitionId(batch.getBatchJobDefinitionId())
+                  .list()
+                  .forEach(migrationJob -> managementService().executeJob(migrationJob.getId()));
+
+              Job monitorJob =
+                  managementService()
+                      .createJobQuery()
+                      .jobDefinitionId(batch.getMonitorJobDefinitionId())
+                      .singleResult();
+              managementService().executeJob(monitorJob.getId());
+            });
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(getCurrentTasks(PROCESS_DEFINITION_KEY, taskService()))
+        .numberOfTasksIs(2)
+        .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
+        .allTasksHaveKey("UserTask2")
+        .allTasksHaveFormkey("Formkey2");
   }
 
   private List<MinorMigrationInstructions> generateMigrationInstructionsFor100To150() {
