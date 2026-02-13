@@ -6,6 +6,7 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.camunda.bpm.engine.impl.migration.MigrationPlanImpl;
 import org.camunda.bpm.engine.migration.MigrationPlan;
+import org.camunda.bpm.engine.migration.MigrationPlanExecutionBuilder;
 
 @RequiredArgsConstructor
 public class PerformMigrationDefaultImpl implements PerformMigration {
@@ -19,23 +20,25 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
       boolean skipCustomListeners,
       boolean skipIoMappings,
       boolean executeAsync) {
-    var migrationExecution =
+
+    MigrationPlanExecutionBuilder executionBuilder =
         processEngine
             .getRuntimeService()
             .newMigration(mapToCamunda7MigrationPlan(plan))
             .processInstanceIds(processInstanceId);
 
     if (skipCustomListeners) {
-      migrationExecution.skipCustomListeners();
+      executionBuilder.skipCustomListeners();
     }
+
     if (skipIoMappings) {
-      migrationExecution.skipIoMappings();
+      executionBuilder.skipIoMappings();
     }
 
     if (executeAsync) {
-      migrationExecution.executeAsync();
+      executionBuilder.executeAsync();
     } else {
-      migrationExecution.execute();
+      executionBuilder.execute();
     }
   }
 

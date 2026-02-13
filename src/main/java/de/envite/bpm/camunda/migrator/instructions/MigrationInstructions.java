@@ -15,15 +15,15 @@ public interface MigrationInstructions {
    * @return a list of {@link MigrationInstructions} that need to be applied when migration from the
    *     given source to the given target minor version.
    */
-  public List<MinorMigrationInstructions> getApplicableMinorMigrationInstructions(
+  List<MinorMigrationInstructions> getApplicableMinorMigrationInstructions(
       String processDefinitionKey,
       int sourceMinorVersion,
       int targetMinorVersion,
       int majorVersion);
 
-  public boolean skipCustomListeners(String processDefinitionKey);
+  boolean skipCustomListeners(String processDefinitionKey);
 
-  public boolean skipIoMappings(String processDefinitionKey);
+  boolean skipIoMappings(String processDefinitionKey);
 
-  public boolean executeAsync(String processDefinitionKey);
+  boolean executeAsync(String processDefinitionKey);
 }

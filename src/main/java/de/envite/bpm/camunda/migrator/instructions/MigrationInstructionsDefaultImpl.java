@@ -14,9 +14,9 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
 
   private Map<String, List<MinorMigrationInstructions>> migrationInstructionMap;
 
-  private Map<String, Boolean> skipCustomListenersMap;
-  private Map<String, Boolean> skipIoMappingsMap;
-  private Map<String, Boolean> executeAsyncMap;
+  private final Map<String, Boolean> skipCustomListenersMap;
+  private final Map<String, Boolean> skipIoMappingsMap;
+  private final Map<String, Boolean> executeAsyncMap;
 
   public MigrationInstructionsDefaultImpl() {
     this.migrationInstructionMap = new HashMap<>();
@@ -53,6 +53,12 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
     return this;
   }
 
+  public MigrationInstructionsDefaultImpl putExecuteAsync(
+      String processDefinitionKey, boolean executeAsync) {
+    executeAsyncMap.put(processDefinitionKey, executeAsync);
+    return this;
+  }
+
   @Override
   public List<MinorMigrationInstructions> getApplicableMinorMigrationInstructions(
       String processDefinitionKey,
@@ -74,28 +80,16 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
 
   @Override
   public boolean skipCustomListeners(String processDefinitionKey) {
-    if (skipCustomListenersMap.containsKey(processDefinitionKey)) {
-      return skipCustomListenersMap.get(processDefinitionKey);
-    } else {
-      return true;
-    }
+    return skipCustomListenersMap.getOrDefault(processDefinitionKey, true);
   }
 
   @Override
   public boolean skipIoMappings(String processDefinitionKey) {
-    if (skipIoMappingsMap.containsKey(processDefinitionKey)) {
-      return skipIoMappingsMap.get(processDefinitionKey);
-    } else {
-      return true;
-    }
+    return skipIoMappingsMap.getOrDefault(processDefinitionKey, true);
   }
 
   @Override
   public boolean executeAsync(String processDefinitionKey) {
-    if (executeAsyncMap.containsKey(processDefinitionKey)) {
-      return executeAsyncMap.get(processDefinitionKey);
-    } else {
-      return false;
-    }
+    return executeAsyncMap.getOrDefault(processDefinitionKey, false);
   }
 }

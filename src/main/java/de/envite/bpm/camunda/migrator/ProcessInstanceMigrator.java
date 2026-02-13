@@ -42,7 +42,7 @@ public class ProcessInstanceMigrator {
   private final GetOlderProcessInstances getOlderProcessInstances;
   private final CreatePatchMigrationplan createPatchMigrationplan;
   private final MigratorLogger migratorLogger;
-  private final MigrationInstructions getMigrationInstructions;
+  private final MigrationInstructions migrationInstructions;
   private final PerformMigration performMigration;
   private final LoadProcessDefinitionKeys loadProcessDefinitionkeys;
   private final LoadNewestDeployedVersion loadNewestDeployedVersion;
@@ -81,9 +81,9 @@ public class ProcessInstanceMigrator {
       for (VersionedProcessInstance processInstance : olderProcessInstances) {
         CustomMigrationPlan migrationPlan = null;
         boolean skipCustomListeners =
-            getMigrationInstructions.skipCustomListeners(processDefinitionKey);
-        boolean skipIoMappings = getMigrationInstructions.skipIoMappings(processDefinitionKey);
-        boolean executeAsync = getMigrationInstructions.executeAsync(processDefinitionKey);
+            migrationInstructions.skipCustomListeners(processDefinitionKey);
+        boolean skipIoMappings = migrationInstructions.skipIoMappings(processDefinitionKey);
+        boolean executeAsync = migrationInstructions.executeAsync(processDefinitionKey);
         if (processInstance.getProcessVersion().isOlderPatchThan(newestProcessVersion)) {
           migrationPlan =
               createPatchMigrationplan.migrationPlanByMappingEqualActivityIDs(
@@ -94,7 +94,7 @@ public class ProcessInstanceMigrator {
                   newestProcessDefinition.get(), processInstance);
 
           List<MinorMigrationInstructions> applicableMinorMigrationInstructions =
-              getMigrationInstructions.getApplicableMinorMigrationInstructions(
+              migrationInstructions.getApplicableMinorMigrationInstructions(
                   processDefinitionKey,
                   processInstance.getProcessVersion().getMinorVersion(),
                   newestProcessVersion.getMinorVersion(),
