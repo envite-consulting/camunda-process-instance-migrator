@@ -1,9 +1,8 @@
 package de.envite.bpm.camunda.migrator.processmetadata;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.List;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RepositoryService;
@@ -34,8 +33,7 @@ class LoadProcessDefinitionKeysDefaultImplTest {
     when(processDefinition1.getKey()).thenReturn("process1");
     when(processDefinition2.getKey()).thenReturn("process2");
 
-    List<ProcessDefinition> processDefinitions =
-        Arrays.asList(processDefinition1, processDefinition2);
+    List<ProcessDefinition> processDefinitions = List.of(processDefinition1, processDefinition2);
 
     when(processEngine.getRepositoryService()).thenReturn(repositoryService);
     when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
@@ -45,9 +43,9 @@ class LoadProcessDefinitionKeysDefaultImplTest {
 
     List<String> result = loadProcessDefinitionKeys.loadKeys();
 
-    assertEquals(2, result.size());
-    assertEquals("process1", result.get(0));
-    assertEquals("process2", result.get(1));
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0)).isEqualTo("process1");
+    assertThat(result.get(1)).isEqualTo("process2");
   }
 
   @Test
@@ -60,6 +58,6 @@ class LoadProcessDefinitionKeysDefaultImplTest {
 
     List<String> result = loadProcessDefinitionKeys.loadKeys();
 
-    assertEquals(0, result.size());
+    assertThat(result).isEmpty();
   }
 }
