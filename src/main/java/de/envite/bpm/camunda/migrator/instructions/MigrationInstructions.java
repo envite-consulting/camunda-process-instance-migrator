@@ -20,10 +20,4 @@ public interface MigrationInstructions {
       int sourceMinorVersion,
       int targetMinorVersion,
       int majorVersion);
-
-  boolean skipCustomListeners(String processDefinitionKey);
-
-  boolean skipIoMappings(String processDefinitionKey);
-
-  boolean executeAsync(String processDefinitionKey);
 }

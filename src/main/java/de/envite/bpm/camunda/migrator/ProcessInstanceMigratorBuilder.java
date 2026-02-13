@@ -4,6 +4,8 @@ import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstancesDefaultImpl;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
+import de.envite.bpm.camunda.migrator.instructions.MigrationProperties;
+import de.envite.bpm.camunda.migrator.instructions.MigrationPropertiesDefaultImpl;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingDataDefaultImpl;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
@@ -31,6 +33,7 @@ public class ProcessInstanceMigratorBuilder {
   private CreatePatchMigrationplan createPatchMigrationplanToSet;
   private MigratorLogger migratorLoggerToSet;
   private MigrationInstructions migrationInstructionsToSet;
+  private MigrationProperties migrationPropertiesToSet;
   private PerformMigration performMigration;
   private LoadProcessDefinitionKeys loadProcessDefinitionKeys;
   private LoadNewestDeployedVersion loadNewestDeployedVersion;
@@ -48,6 +51,9 @@ public class ProcessInstanceMigratorBuilder {
     }
     if (migrationInstructionsToSet == null) {
       this.migrationInstructionsToSet = new MigrationInstructionsDefaultImpl();
+    }
+    if (migrationPropertiesToSet == null) {
+      this.migrationPropertiesToSet = new MigrationPropertiesDefaultImpl();
     }
     if (performMigration == null) {
       this.performMigration = new PerformMigrationDefaultImpl(processEngine);
@@ -88,6 +94,12 @@ public class ProcessInstanceMigratorBuilder {
     return this;
   }
 
+  public ProcessInstanceMigratorBuilder withMigrationProperties(
+      MigrationProperties migrationProperties) {
+    this.migrationPropertiesToSet = migrationProperties;
+    return this;
+  }
+
   public ProcessInstanceMigratorBuilder withLoadProcessDefinitionKeys(
       LoadProcessDefinitionKeys loadProcessDefinitionKeys) {
     this.loadProcessDefinitionKeys = loadProcessDefinitionKeys;
@@ -112,6 +124,7 @@ public class ProcessInstanceMigratorBuilder {
         createPatchMigrationplanToSet,
         migratorLoggerToSet,
         migrationInstructionsToSet,
+        migrationPropertiesToSet,
         performMigration,
         loadProcessDefinitionKeys,
         loadNewestDeployedVersion,
