@@ -106,13 +106,13 @@ public class MigratorConfiguration {
   public ProcessInstanceMigrator processInstanceMigrator() {
     ProcessInstanceMigrator processInstanceMigrator = ProcessInstanceMigrator.builder()
         .ofProcessEngine(processEngine())
-        .withGetMigrationInstructions(generateMigrationInstructions())
+        .withMigrationInstructions(generateMigrationInstructions())
         .build();
   }
 
-  private GetMigrationInstructions generateMigrationInstructions() {
+  private MigrationInstructions generateMigrationInstructions() {
     //use the prepared way of specifying instructions or implement your own
-    return new MigrationInstructionsMap()
+    return new MigrationInstructionsDefaultImpl()
         .putInstructions("Some_process_definition_key", Arrays.asList(
             MinorMigrationInstructions.builder()
                 .sourceMinorVersion(0)
@@ -155,8 +155,8 @@ public class MigratorConfiguration {
   public ProcessInstanceMigrator processInstanceMigrator() {
     ProcessInstanceMigrator processInstanceMigrator = ProcessInstanceMigrator.builder()
         .ofProcessEngine(processEngine())
-        //CustomJsonMigrationInstructionReader implements GetMigrationInstructions
-        .withGetMigrationInstructions(new CustomJsonMigrationInstructionReader())
+        //CustomJsonMigrationInstructionReader implements MigrationInstructions
+        .withMigrationInstructions(new CustomJsonMigrationInstructionReader())
         //CustomMigratorLogger implements MigratorLogger
         .withMigratorLogger(new CustomMigratorLogger())
         .build();
