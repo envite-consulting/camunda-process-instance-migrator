@@ -1,6 +1,6 @@
 package de.envite.bpm.camunda.migrator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
@@ -29,19 +29,10 @@ class ProcessInstanceMigratorBuilderTest {
   }
 
   @Test
-  void testOfProcessEngine_InitializesDefaultImplementations() {
-    ProcessInstanceMigratorBuilder result = builder.ofProcessEngine(processEngine);
-
-    assertNotNull(result);
-    assertEquals(builder, result);
-
-    assertNotNull(builder);
-  }
-
-  @Test
   void testOfProcessEngine_WithExistingImplementations_DoesNotOverride() {
     ProcessInstanceMigratorBuilder result = builder.ofProcessEngine(processEngine);
-    assertEquals(builder, result);
+
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
@@ -50,8 +41,7 @@ class ProcessInstanceMigratorBuilderTest {
     ProcessInstanceMigratorBuilder result =
         builder.withGetOlderProcessInstances(customGetOlderProcessInstances);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
@@ -60,8 +50,7 @@ class ProcessInstanceMigratorBuilderTest {
     ProcessInstanceMigratorBuilder result =
         builder.withCreatePatchMigrationplanToSet(customCreatePatchMigrationplan);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
@@ -69,8 +58,7 @@ class ProcessInstanceMigratorBuilderTest {
     MigratorLogger customMigratorLogger = mock(MigratorLogger.class);
     ProcessInstanceMigratorBuilder result = builder.withMigratorLogger(customMigratorLogger);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
@@ -79,8 +67,7 @@ class ProcessInstanceMigratorBuilderTest {
     ProcessInstanceMigratorBuilder result =
         builder.withGetMigrationInstructions(customGetMigrationInstructions);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
@@ -90,8 +77,7 @@ class ProcessInstanceMigratorBuilderTest {
     ProcessInstanceMigratorBuilder result =
         builder.withLoadProcessDefinitionKeys(customLoadProcessDefinitionKeys);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
@@ -101,8 +87,7 @@ class ProcessInstanceMigratorBuilderTest {
     ProcessInstanceMigratorBuilder result =
         builder.withLoadNewestDeployedVersion(customLoadNewestDeployedVersion);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
@@ -112,15 +97,14 @@ class ProcessInstanceMigratorBuilderTest {
     ProcessInstanceMigratorBuilder result =
         builder.withGenerateAllInstancesLoggingData(customGenerateAllInstancesLoggingData);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
   }
 
   @Test
   void testBuild() {
     ProcessInstanceMigrator migrator = builder.build();
 
-    assertNotNull(migrator);
+    assertThat(migrator).isNotNull();
   }
 
   @Test
@@ -147,10 +131,9 @@ class ProcessInstanceMigratorBuilderTest {
             .withGenerateAllInstancesLoggingData(customGenerateAllInstancesLoggingData)
             .ofProcessEngine(processEngine);
 
-    assertNotNull(result);
-    assertEquals(builder, result);
+    assertThat(result).isEqualTo(builder);
 
     ProcessInstanceMigrator migrator = builder.build();
-    assertNotNull(migrator);
+    assertThat(migrator).isNotNull();
   }
 }
