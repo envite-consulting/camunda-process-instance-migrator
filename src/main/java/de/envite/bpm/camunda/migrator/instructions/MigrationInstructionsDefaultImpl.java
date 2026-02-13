@@ -14,15 +14,8 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
 
   private Map<String, List<MinorMigrationInstructions>> migrationInstructionMap;
 
-  private final Map<String, Boolean> skipCustomListenersMap;
-  private final Map<String, Boolean> skipIoMappingsMap;
-  private final Map<String, Boolean> executeAsyncMap;
-
   public MigrationInstructionsDefaultImpl() {
     this.migrationInstructionMap = new HashMap<>();
-    this.skipCustomListenersMap = new HashMap<>();
-    this.skipIoMappingsMap = new HashMap<>();
-    this.executeAsyncMap = new HashMap<>();
   }
 
   public void clearInstructions() {
@@ -38,24 +31,6 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
       // add)
       migrationInstructionMap.put(processDefinitionKey, new ArrayList<>(instructions));
     }
-    return this;
-  }
-
-  public MigrationInstructionsDefaultImpl putSkipCustomListeners(
-      String processDefinitionKey, boolean skipCustomListeners) {
-    skipCustomListenersMap.put(processDefinitionKey, skipCustomListeners);
-    return this;
-  }
-
-  public MigrationInstructionsDefaultImpl putSkipIoMappings(
-      String processDefinitionKey, boolean skipIoMappings) {
-    skipIoMappingsMap.put(processDefinitionKey, skipIoMappings);
-    return this;
-  }
-
-  public MigrationInstructionsDefaultImpl putExecuteAsync(
-      String processDefinitionKey, boolean executeAsync) {
-    executeAsyncMap.put(processDefinitionKey, executeAsync);
     return this;
   }
 
@@ -76,20 +51,5 @@ public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
     } else {
       return Collections.emptyList();
     }
-  }
-
-  @Override
-  public boolean skipCustomListeners(String processDefinitionKey) {
-    return skipCustomListenersMap.getOrDefault(processDefinitionKey, true);
-  }
-
-  @Override
-  public boolean skipIoMappings(String processDefinitionKey) {
-    return skipIoMappingsMap.getOrDefault(processDefinitionKey, true);
-  }
-
-  @Override
-  public boolean executeAsync(String processDefinitionKey) {
-    return executeAsyncMap.getOrDefault(processDefinitionKey, false);
   }
 }

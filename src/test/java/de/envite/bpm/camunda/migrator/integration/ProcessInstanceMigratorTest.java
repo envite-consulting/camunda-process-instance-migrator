@@ -22,7 +22,7 @@ import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskSer
 
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigrator;
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigratorBuilder;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
+import de.envite.bpm.camunda.migrator.instructions.MigrationPropertiesDefaultImpl;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.Job;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -432,12 +432,12 @@ class ProcessInstanceMigratorTest {
     deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
     deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
 
-    MigrationInstructionsDefaultImpl instructions = new MigrationInstructionsDefaultImpl();
-    instructions.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
-    instructions.putSkipIoMappings(PROCESS_DEFINITION_KEY, false);
+    MigrationPropertiesDefaultImpl migrationProperties = new MigrationPropertiesDefaultImpl();
+    migrationProperties.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
+    migrationProperties.putSkipIoMappings(PROCESS_DEFINITION_KEY, false);
 
     processInstanceMigratorBuilder
-        .withMigrationInstructions(instructions)
+        .withMigrationProperties(migrationProperties)
         .build()
         .migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
@@ -457,11 +457,11 @@ class ProcessInstanceMigratorTest {
     deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
     deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
 
-    MigrationInstructionsDefaultImpl instructions = new MigrationInstructionsDefaultImpl();
-    instructions.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
+    MigrationPropertiesDefaultImpl migrationProperties = new MigrationPropertiesDefaultImpl();
+    migrationProperties.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
 
     processInstanceMigratorBuilder
-        .withMigrationInstructions(instructions)
+        .withMigrationProperties(migrationProperties)
         .build()
         .migrateProcessInstances(PROCESS_DEFINITION_KEY);
 

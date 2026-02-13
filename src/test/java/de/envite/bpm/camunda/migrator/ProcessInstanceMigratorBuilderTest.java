@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
+import de.envite.bpm.camunda.migrator.instructions.MigrationProperties;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
 import de.envite.bpm.camunda.migrator.plan.CreatePatchMigrationplan;
@@ -71,6 +72,15 @@ class ProcessInstanceMigratorBuilderTest {
   }
 
   @Test
+  void testWithMigrationProperties() {
+    MigrationProperties customMigrationProperties = mock(MigrationProperties.class);
+    ProcessInstanceMigratorBuilder result =
+        builder.withMigrationProperties(customMigrationProperties);
+
+    assertThat(result).isEqualTo(builder);
+  }
+
+  @Test
   void testWithLoadProcessDefinitionKeys() {
     LoadProcessDefinitionKeys customLoadProcessDefinitionKeys =
         mock(LoadProcessDefinitionKeys.class);
@@ -113,6 +123,7 @@ class ProcessInstanceMigratorBuilderTest {
     CreatePatchMigrationplan customCreatePatchMigrationplan = mock(CreatePatchMigrationplan.class);
     MigratorLogger customMigratorLogger = mock(MigratorLogger.class);
     MigrationInstructions customMigrationInstructions = mock(MigrationInstructions.class);
+    MigrationProperties customMigrationProperties = mock(MigrationProperties.class);
     LoadProcessDefinitionKeys customLoadProcessDefinitionKeys =
         mock(LoadProcessDefinitionKeys.class);
     LoadNewestDeployedVersion customLoadNewestDeployedVersion =
@@ -126,6 +137,7 @@ class ProcessInstanceMigratorBuilderTest {
             .withCreatePatchMigrationplanToSet(customCreatePatchMigrationplan)
             .withMigratorLogger(customMigratorLogger)
             .withMigrationInstructions(customMigrationInstructions)
+            .withMigrationProperties(customMigrationProperties)
             .withLoadProcessDefinitionKeys(customLoadProcessDefinitionKeys)
             .withLoadNewestDeployedVersion(customLoadNewestDeployedVersion)
             .withGenerateAllInstancesLoggingData(customGenerateAllInstancesLoggingData)

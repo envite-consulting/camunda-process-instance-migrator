@@ -19,6 +19,7 @@ import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskSer
 
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigrator;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
+import de.envite.bpm.camunda.migrator.instructions.MigrationPropertiesDefaultImpl;
 import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,10 +56,13 @@ class ProcessInstanceMigratorTest_Minor {
 
   private final MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
       new MigrationInstructionsDefaultImpl();
+  private final MigrationPropertiesDefaultImpl migrationPropertiesDefaultImpl =
+      new MigrationPropertiesDefaultImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
       ProcessInstanceMigrator.builder()
           .ofProcessEngine(processEngine())
           .withMigrationInstructions(migrationInstructionsDefaultImpl)
+          .withMigrationProperties(migrationPropertiesDefaultImpl)
           .build();
 
   private ProcessDefinition initialProcessDefinition;
@@ -319,8 +323,9 @@ class ProcessInstanceMigratorTest_Minor {
 
     migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
-    migrationInstructionsDefaultImpl.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
-    migrationInstructionsDefaultImpl.putSkipIoMappings(PROCESS_DEFINITION_KEY, false);
+
+    migrationPropertiesDefaultImpl.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
+    migrationPropertiesDefaultImpl.putSkipIoMappings(PROCESS_DEFINITION_KEY, false);
 
     processInstanceMigrator.migrateInstancesOfAllProcesses();
 
@@ -343,7 +348,8 @@ class ProcessInstanceMigratorTest_Minor {
 
     migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
-    migrationInstructionsDefaultImpl.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
+
+    migrationPropertiesDefaultImpl.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
 
     processInstanceMigrator.migrateInstancesOfAllProcesses();
 

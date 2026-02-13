@@ -6,6 +6,7 @@ import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionCombiner;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsAdder;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
+import de.envite.bpm.camunda.migrator.instructions.MigrationProperties;
 import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
@@ -43,6 +44,7 @@ public class ProcessInstanceMigrator {
   private final CreatePatchMigrationplan createPatchMigrationplan;
   private final MigratorLogger migratorLogger;
   private final MigrationInstructions migrationInstructions;
+  private final MigrationProperties migrationProperties;
   private final PerformMigration performMigration;
   private final LoadProcessDefinitionKeys loadProcessDefinitionkeys;
   private final LoadNewestDeployedVersion loadNewestDeployedVersion;
@@ -80,10 +82,6 @@ public class ProcessInstanceMigrator {
 
       for (VersionedProcessInstance processInstance : olderProcessInstances) {
         CustomMigrationPlan migrationPlan = null;
-        boolean skipCustomListeners =
-            migrationInstructions.skipCustomListeners(processDefinitionKey);
-        boolean skipIoMappings = migrationInstructions.skipIoMappings(processDefinitionKey);
-        boolean executeAsync = migrationInstructions.executeAsync(processDefinitionKey);
         if (processInstance.getProcessVersion().isOlderPatchThan(newestProcessVersion)) {
           migrationPlan =
               createPatchMigrationplan.migrationPlanByMappingEqualActivityIDs(
@@ -112,9 +110,9 @@ public class ProcessInstanceMigrator {
             performMigration.forPlanAndProcessInstanceId(
                 migrationPlan,
                 processInstance.getProcessInstanceId(),
-                skipCustomListeners,
-                skipIoMappings,
-                executeAsync);
+                migrationProperties.skipCustomListeners(processDefinitionKey),
+                migrationProperties.skipIoMappings(processDefinitionKey),
+                migrationProperties.executeAsync(processDefinitionKey));
             migratorLogger.logMigrationSuccessful(
                 processInstance.getProcessInstanceId(), processInstance.getBusinessKey(),
                 processInstance.getProcessVersion().toVersionTag(),
