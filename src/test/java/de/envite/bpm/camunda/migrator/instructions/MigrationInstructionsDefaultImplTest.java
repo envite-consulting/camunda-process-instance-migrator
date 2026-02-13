@@ -8,21 +8,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class MigrationInstructionsMapTest {
+class MigrationInstructionsDefaultImplTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_return_empty_for_no_matching_process() {
-    MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
+        new MigrationInstructionsDefaultImpl();
 
     List<MinorMigrationInstructions> result =
-        migrationInstructionsMap.getApplicableMinorMigrationInstructions("processKey", 3, 4, 1);
+        migrationInstructionsDefaultImpl.getApplicableMinorMigrationInstructions(
+            "processKey", 3, 4, 1);
 
     assertThat(result).isNotNull().isEmpty();
   }
 
   @Test
   void getApplicableMinorMigrationInstructions_should_filter_by_target_minor_version() {
-    MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
+        new MigrationInstructionsDefaultImpl();
 
     MinorMigrationInstructions instruction =
         MinorMigrationInstructions.builder()
@@ -32,10 +35,11 @@ class MigrationInstructionsMapTest {
             .majorVersion(1)
             .build();
 
-    migrationInstructionsMap.putInstructions("processKey", List.of(instruction));
+    migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
     List<MinorMigrationInstructions> result =
-        migrationInstructionsMap.getApplicableMinorMigrationInstructions("processKey", 1, 2, 1);
+        migrationInstructionsDefaultImpl.getApplicableMinorMigrationInstructions(
+            "processKey", 1, 2, 1);
 
     assertThat(result).isNotNull();
     assertThat(result).isEmpty();
@@ -43,7 +47,8 @@ class MigrationInstructionsMapTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_filter_by_source_minor_version() {
-    MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
+        new MigrationInstructionsDefaultImpl();
 
     MinorMigrationInstructions instruction =
         MinorMigrationInstructions.builder()
@@ -53,10 +58,11 @@ class MigrationInstructionsMapTest {
             .majorVersion(1)
             .build();
 
-    migrationInstructionsMap.putInstructions("processKey", List.of(instruction));
+    migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
     List<MinorMigrationInstructions> result =
-        migrationInstructionsMap.getApplicableMinorMigrationInstructions("processKey", 1, 2, 1);
+        migrationInstructionsDefaultImpl.getApplicableMinorMigrationInstructions(
+            "processKey", 1, 2, 1);
 
     assertThat(result).isNotNull();
     assertThat(result).isEmpty();
@@ -64,7 +70,8 @@ class MigrationInstructionsMapTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_filter_by_major_version() {
-    MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
+        new MigrationInstructionsDefaultImpl();
 
     MinorMigrationInstructions instruction =
         MinorMigrationInstructions.builder()
@@ -74,10 +81,11 @@ class MigrationInstructionsMapTest {
             .majorVersion(2)
             .build();
 
-    migrationInstructionsMap.putInstructions("processKey", List.of(instruction));
+    migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
     List<MinorMigrationInstructions> result =
-        migrationInstructionsMap.getApplicableMinorMigrationInstructions("processKey", 1, 2, 1);
+        migrationInstructionsDefaultImpl.getApplicableMinorMigrationInstructions(
+            "processKey", 1, 2, 1);
 
     assertThat(result).isNotNull();
     assertThat(result).isEmpty();
@@ -85,7 +93,8 @@ class MigrationInstructionsMapTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_return_matching_instructions() {
-    MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
+        new MigrationInstructionsDefaultImpl();
 
     MinorMigrationInstructions instruction =
         MinorMigrationInstructions.builder()
@@ -95,10 +104,11 @@ class MigrationInstructionsMapTest {
             .majorVersion(1)
             .build();
 
-    migrationInstructionsMap.putInstructions("processKey", List.of(instruction));
+    migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
     List<MinorMigrationInstructions> result =
-        migrationInstructionsMap.getApplicableMinorMigrationInstructions("processKey", 1, 2, 1);
+        migrationInstructionsDefaultImpl.getApplicableMinorMigrationInstructions(
+            "processKey", 1, 2, 1);
 
     assertThat(result).isNotNull();
     assertThat(result).isNotEmpty();

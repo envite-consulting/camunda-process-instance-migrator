@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
-import de.envite.bpm.camunda.migrator.instructions.GetMigrationInstructions;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
 import de.envite.bpm.camunda.migrator.plan.CreatePatchMigrationplan;
@@ -62,10 +62,10 @@ class ProcessInstanceMigratorBuilderTest {
   }
 
   @Test
-  void testWithGetMigrationInstructions() {
-    GetMigrationInstructions customGetMigrationInstructions = mock(GetMigrationInstructions.class);
+  void testWithMigrationInstructions() {
+    MigrationInstructions customMigrationInstructions = mock(MigrationInstructions.class);
     ProcessInstanceMigratorBuilder result =
-        builder.withGetMigrationInstructions(customGetMigrationInstructions);
+        builder.withMigrationInstructions(customMigrationInstructions);
 
     assertThat(result).isEqualTo(builder);
   }
@@ -112,7 +112,7 @@ class ProcessInstanceMigratorBuilderTest {
     GetOlderProcessInstances customGetOlderProcessInstances = mock(GetOlderProcessInstances.class);
     CreatePatchMigrationplan customCreatePatchMigrationplan = mock(CreatePatchMigrationplan.class);
     MigratorLogger customMigratorLogger = mock(MigratorLogger.class);
-    GetMigrationInstructions customGetMigrationInstructions = mock(GetMigrationInstructions.class);
+    MigrationInstructions customMigrationInstructions = mock(MigrationInstructions.class);
     LoadProcessDefinitionKeys customLoadProcessDefinitionKeys =
         mock(LoadProcessDefinitionKeys.class);
     LoadNewestDeployedVersion customLoadNewestDeployedVersion =
@@ -125,7 +125,7 @@ class ProcessInstanceMigratorBuilderTest {
             .withGetOlderProcessInstances(customGetOlderProcessInstances)
             .withCreatePatchMigrationplanToSet(customCreatePatchMigrationplan)
             .withMigratorLogger(customMigratorLogger)
-            .withGetMigrationInstructions(customGetMigrationInstructions)
+            .withMigrationInstructions(customMigrationInstructions)
             .withLoadProcessDefinitionKeys(customLoadProcessDefinitionKeys)
             .withLoadNewestDeployedVersion(customLoadNewestDeployedVersion)
             .withGenerateAllInstancesLoggingData(customGenerateAllInstancesLoggingData)

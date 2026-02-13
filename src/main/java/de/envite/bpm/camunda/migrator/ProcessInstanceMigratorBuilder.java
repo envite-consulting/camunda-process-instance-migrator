@@ -82,9 +82,9 @@ public class ProcessInstanceMigratorBuilder {
     return this;
   }
 
-  public ProcessInstanceMigratorBuilder withGetMigrationInstructions(
-      MigrationInstructions getMigrationInstructions) {
-    this.migrationInstructionsToSet = getMigrationInstructions;
+  public ProcessInstanceMigratorBuilder withMigrationInstructions(
+      MigrationInstructions migrationInstructions) {
+    this.migrationInstructionsToSet = migrationInstructions;
     return this;
   }
 
