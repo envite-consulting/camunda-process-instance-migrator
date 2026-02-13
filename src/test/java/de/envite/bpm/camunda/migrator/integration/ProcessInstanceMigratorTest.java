@@ -10,7 +10,7 @@ import static de.envite.bpm.camunda.migrator.integration.TestHelper.suspendProce
 import static de.envite.bpm.camunda.migrator.integration.assertions.ProcessInstanceListAsserter.assertThat;
 import static de.envite.bpm.camunda.migrator.integration.assertions.TaskListAsserter.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
@@ -350,7 +350,7 @@ class ProcessInstanceMigratorTest {
     deployInitialProcessModelAndStartProcessInstances(
         NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION, null);
 
-    assertThatException()
+    assertThatNoException()
         .isThrownBy(() -> processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY));
   }
 
