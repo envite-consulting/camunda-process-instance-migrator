@@ -35,6 +35,8 @@ class ProcessInstanceMigratorTest {
       "test-processmodels/migrateable_processmodel_1_0_0.bpmn";
   private static final String UPDATED_PROCESS_MODEL_PATH =
       "test-processmodels/migrateable_processmodel_1_0_1_with_formkeys.bpmn";
+  private static final String UPDATED_PROCESS_MODEL_PATH_1_0_2 =
+      "test-processmodels/migrateable_processmodel_1_0_2.bpmn";
   private static final String UPDATED_PROCESS_MODEL_PATH_WITH_SUBPROCESSES =
       "test-processmodels/migrateable_processmodel_1_0_2_with_subprocesses.bpmn";
   private static final String MINOR_INCREASED_PROCESS_MODEL_PATH =
@@ -119,6 +121,36 @@ class ProcessInstanceMigratorTest {
 
     assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
     assertThat(processInstance2).isWaitingAtExactly("ReceiveTask1");
+  }
+
+  @Test
+  void processInstanceMigrator_should_migrate_all_process_instances_to_latest_patch() {
+    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
+    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH_1_0_2, "1.0.2");
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(initialProcessDefinition.getId());
+
+    complete(task(processInstance1));
+    complete(task(processInstance2));
+
+    complete(task(processInstance1));
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
+
+    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.0.2");
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
   }
 
   @Test
