@@ -9,6 +9,7 @@ import static de.envite.bpm.camunda.migrator.integration.assertions.ProcessInsta
 import static de.envite.bpm.camunda.migrator.integration.assertions.TaskListAsserter.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.AbstractAssertions.processEngine;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
@@ -40,6 +41,10 @@ class ProcessInstanceMigratorTest_Minor {
       "test-processmodels/migrateable_processmodel_1_5_1.bpmn";
   private static final String MINOR_INCREASED_WITH_THIRD_TASK_PROCESS_MODEL_PATH =
       "test-processmodels/migrateable_processmodel_1_7_0.bpmn";
+  private static final String MINOR_1_1_0_PROCESS_MODEL_PATH =
+      "test-processmodels/migrateable_processmodel_1_1_0.bpmn";
+  private static final String MINOR_1_2_0_PROCESS_MODEL_PATH =
+      "test-processmodels/migrateable_processmodel_1_2_0.bpmn";
   private static final String PROCESS_DEFINITION_KEY = "MigrateableProcess";
 
   @RegisterExtension
@@ -335,5 +340,62 @@ class ProcessInstanceMigratorTest_Minor {
             .migrationInstructions(List.of(new MigrationInstructionImpl("UserTask3", "UserTask2")))
             .majorVersion(1)
             .build());
+  }
+
+  @Test
+  void processInstanceMigrator_should_migrate_all_process_instances_to_latest_minor() {
+    deployBPMNFromClasspathResource(MINOR_1_1_0_PROCESS_MODEL_PATH, repositoryService());
+    ProcessDefinition minorV1Definition =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+    assertThat(minorV1Definition.getVersionTag()).isEqualTo("1.1.0");
+
+    deployBPMNFromClasspathResource(MINOR_1_2_0_PROCESS_MODEL_PATH, repositoryService());
+    newestProcessDefinitionAfterRedeployment =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.2.0");
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(initialProcessDefinition.getId());
+
+    complete(task(processInstance1));
+    complete(task(processInstance2));
+
+    complete(task(processInstance1));
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
+
+    migrationInstructionsMap.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            MinorMigrationInstructions.builder()
+                .sourceMinorVersion(0)
+                .targetMinorVersion(1)
+                .migrationInstructions(
+                    List.of(new MigrationInstructionImpl("UserTask1", "UserTaskA")))
+                .majorVersion(1)
+                .build()));
+    migrationInstructionsMap.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            MinorMigrationInstructions.builder()
+                .sourceMinorVersion(1)
+                .targetMinorVersion(2)
+                .migrationInstructions(
+                    List.of(new MigrationInstructionImpl("ReceiveTask1", "ReceiveTaskB")))
+                .majorVersion(1)
+                .build()));
+
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.2.0");
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTaskB");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
   }
 }
