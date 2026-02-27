@@ -2,10 +2,11 @@ package de.envite.bpm.camunda.migrator;
 
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
 import de.envite.bpm.camunda.migrator.instances.VersionedProcessInstance;
-import de.envite.bpm.camunda.migrator.instructions.GetMigrationInstructions;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionCombiner;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsAdder;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsMap;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
+import de.envite.bpm.camunda.migrator.instructions.MigrationProperties;
 import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
@@ -31,7 +32,7 @@ import lombok.RequiredArgsConstructor;
  *   <li>Increase patch version for simple changes which can be migrated by mapping equal task IDs.
  *       Migration of those changes should work out of the box.
  *   <li>Increase minor version for changes that need a mapping of some kind for migration to work.
- *       Provide these mappings via a {@link MigrationInstructionsMap}-Bean.
+ *       Provide these mappings via a {@link MigrationInstructionsDefaultImpl}-Bean.
  *   <li>Increase major version for changes where no migration is possible or wanted.
  * </ul>
  */
@@ -42,7 +43,8 @@ public class ProcessInstanceMigrator {
   private final GetOlderProcessInstances getOlderProcessInstances;
   private final CreatePatchMigrationplan createPatchMigrationplan;
   private final MigratorLogger migratorLogger;
-  private final GetMigrationInstructions getMigrationInstructions;
+  private final MigrationInstructions migrationInstructions;
+  private final MigrationProperties migrationProperties;
   private final PerformMigration performMigration;
   private final LoadProcessDefinitionKeys loadProcessDefinitionkeys;
   private final LoadNewestDeployedVersion loadNewestDeployedVersion;
@@ -90,7 +92,7 @@ public class ProcessInstanceMigrator {
                   newestProcessDefinition.get(), processInstance);
 
           List<MinorMigrationInstructions> applicableMinorMigrationInstructions =
-              getMigrationInstructions.getApplicableMinorMigrationInstructions(
+              migrationInstructions.getApplicableMinorMigrationInstructions(
                   processDefinitionKey,
                   processInstance.getProcessVersion().getMinorVersion(),
                   newestProcessVersion.getMinorVersion(),
@@ -106,7 +108,11 @@ public class ProcessInstanceMigrator {
         if (migrationPlan != null) {
           try {
             performMigration.forPlanAndProcessInstanceId(
-                migrationPlan, processInstance.getProcessInstanceId());
+                migrationPlan,
+                processInstance.getProcessInstanceId(),
+                migrationProperties.skipCustomListeners(processDefinitionKey),
+                migrationProperties.skipIoMappings(processDefinitionKey),
+                migrationProperties.executeAsync(processDefinitionKey));
             migratorLogger.logMigrationSuccessful(
                 processInstance.getProcessInstanceId(), processInstance.getBusinessKey(),
                 processInstance.getProcessVersion().toVersionTag(),

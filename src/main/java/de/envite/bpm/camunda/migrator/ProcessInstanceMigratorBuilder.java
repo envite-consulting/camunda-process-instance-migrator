@@ -2,8 +2,10 @@ package de.envite.bpm.camunda.migrator;
 
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstances;
 import de.envite.bpm.camunda.migrator.instances.GetOlderProcessInstancesDefaultImpl;
-import de.envite.bpm.camunda.migrator.instructions.GetMigrationInstructions;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsMap;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructions;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
+import de.envite.bpm.camunda.migrator.instructions.MigrationProperties;
+import de.envite.bpm.camunda.migrator.instructions.MigrationPropertiesDefaultImpl;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.camunda.migrator.logging.GenerateAllInstancesLoggingDataDefaultImpl;
 import de.envite.bpm.camunda.migrator.logging.MigratorLogger;
@@ -30,7 +32,8 @@ public class ProcessInstanceMigratorBuilder {
   private GetOlderProcessInstances getOlderProcessInstancesToSet;
   private CreatePatchMigrationplan createPatchMigrationplanToSet;
   private MigratorLogger migratorLoggerToSet;
-  private GetMigrationInstructions getMigrationInstructionsToSet;
+  private MigrationInstructions migrationInstructionsToSet;
+  private MigrationProperties migrationPropertiesToSet;
   private PerformMigration performMigration;
   private LoadProcessDefinitionKeys loadProcessDefinitionKeys;
   private LoadNewestDeployedVersion loadNewestDeployedVersion;
@@ -46,8 +49,11 @@ public class ProcessInstanceMigratorBuilder {
     if (migratorLoggerToSet == null) {
       this.migratorLoggerToSet = new MigratorLoggerDefaultImpl();
     }
-    if (getMigrationInstructionsToSet == null) {
-      this.getMigrationInstructionsToSet = new MigrationInstructionsMap();
+    if (migrationInstructionsToSet == null) {
+      this.migrationInstructionsToSet = new MigrationInstructionsDefaultImpl();
+    }
+    if (migrationPropertiesToSet == null) {
+      this.migrationPropertiesToSet = new MigrationPropertiesDefaultImpl();
     }
     if (performMigration == null) {
       this.performMigration = new PerformMigrationDefaultImpl(processEngine);
@@ -82,9 +88,15 @@ public class ProcessInstanceMigratorBuilder {
     return this;
   }
 
-  public ProcessInstanceMigratorBuilder withGetMigrationInstructions(
-      GetMigrationInstructions getMigrationInstructions) {
-    this.getMigrationInstructionsToSet = getMigrationInstructions;
+  public ProcessInstanceMigratorBuilder withMigrationInstructions(
+      MigrationInstructions migrationInstructions) {
+    this.migrationInstructionsToSet = migrationInstructions;
+    return this;
+  }
+
+  public ProcessInstanceMigratorBuilder withMigrationProperties(
+      MigrationProperties migrationProperties) {
+    this.migrationPropertiesToSet = migrationProperties;
     return this;
   }
 
@@ -111,7 +123,8 @@ public class ProcessInstanceMigratorBuilder {
         getOlderProcessInstancesToSet,
         createPatchMigrationplanToSet,
         migratorLoggerToSet,
-        getMigrationInstructionsToSet,
+        migrationInstructionsToSet,
+        migrationPropertiesToSet,
         performMigration,
         loadProcessDefinitionKeys,
         loadNewestDeployedVersion,

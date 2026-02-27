@@ -20,7 +20,7 @@
 	
 	<groupId>de.envite.bpm</groupId>
 	<artifactId>camunda-process-instance-migrator</artifactId>
-	<version>2.0.3-SNAPSHOT</version>
+	<version>2.1.0-SNAPSHOT</version>
 
 	<name>Camunda Process Instance Migrator</name>
 	<description>Process Instance Migrator for Camunda BPM</description>
@@ -39,18 +39,18 @@
 		<url>https://github.com/envite-consulting/camunda-process-instance-migrator</url>
 		<connection>scm:git:git:/github.com/envite-consulting/camunda-process-instance-migrator.git</connection>
 		<developerConnection>scm:git:git@github.com:envite-consulting/camunda-process-instance-migrator.git</developerConnection>
-		<tag>2.0.0</tag>
+		<tag>2.1.0</tag>
 	</scm>
 
 	<properties>
-		<camunda.version>7.24.0</camunda.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
-    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-    <sonar.sources>src/main/java</sonar.sources>
-    <sonar.tests>src/test/java</sonar.tests>
+		 <camunda.version>7.24.0</camunda.version>
+     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
+     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+     <sonar.sources>src/main/java</sonar.sources>
+     <sonar.tests>src/test/java</sonar.tests>
 	</properties>
 	
 	<dependencies>
@@ -98,13 +98,13 @@
 		    <version>15.0.0</version>
 		    <scope>test</scope>
 		</dependency>
-	
-		<dependency>
-			<groupId>org.camunda.bpm.extension.mockito</groupId>
-			<artifactId>camunda-bpm-mockito</artifactId>
-			<scope>test</scope>
-			<version>5.16.0</version>
-		</dependency>
+
+        <dependency>
+            <groupId>org.camunda.community.mockito</groupId>
+            <artifactId>camunda-platform-7-mockito</artifactId>
+            <scope>test</scope>
+            <version>${camunda.version}</version>
+        </dependency>
 		
 		<!-- Project Lombok requires IDE extension! -->
 		<dependency>
@@ -131,7 +131,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.14.1</version>
+        <version>3.15.0</version>
         <configuration>
           <release>17</release>
           <annotationProcessorPaths>
@@ -148,7 +148,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.4.2</version>
+				<version>3.5.0</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -163,7 +163,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.0</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -191,10 +191,10 @@
 				</executions>
 			</plugin>
 
-      <plugin>
+            <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.2.1</version>
         <configuration>
           <java>
             <googleJavaFormat>
@@ -202,6 +202,51 @@
           </java>
         </configuration>
       </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 
@@ -234,7 +279,7 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.9.0</version>
+            <version>0.10.0</version>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
@@ -280,7 +325,7 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.9.0</version>
+            <version>0.10.0</version>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>

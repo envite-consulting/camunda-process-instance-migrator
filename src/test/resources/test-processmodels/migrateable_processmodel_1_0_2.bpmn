@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1gkaqyk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.40.1">
-  <bpmn:process id="MigrateableProcess" name="Migrateable Process" isExecutable="true" camunda:versionTag="1.0.1" camunda:historyTimeToLive="0">
+  <bpmn:process id="MigrateableProcess" name="Migrateable Process" isExecutable="true" camunda:versionTag="1.0.2" camunda:historyTimeToLive="0">
     <bpmn:startEvent id="StartEvent_1" name="Process started">
       <bpmn:outgoing>SequenceFlow_097y2v3</bpmn:outgoing>
     </bpmn:startEvent>
@@ -10,15 +10,15 @@
       <bpmn:incoming>SequenceFlow_03yewvu</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_03yewvu" sourceRef="ReceiveTask1" targetRef="EndEvent_0vgdufb" />
-    <bpmn:userTask id="UserTask1" name="Do something (renamed)" camunda:formKey="Formkey1">
+    <bpmn:userTask id="UserTask1" name="Do something (v2)" camunda:formKey="Formkey1">
       <bpmn:incoming>SequenceFlow_097y2v3</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_137msd1</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:receiveTask id="ReceiveTask1" name="Wait for Message (renamed)">
+    <bpmn:receiveTask id="ReceiveTask1" name="Wait for Message (v2)">
       <bpmn:incoming>Flow_0gd2wyi</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_03yewvu</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:userTask id="UserTask2" name="Do something else (renamed)">
+    <bpmn:userTask id="UserTask2" name="Do something else (v2)">
       <bpmn:incoming>SequenceFlow_137msd1</bpmn:incoming>
       <bpmn:outgoing>Flow_0gd2wyi</bpmn:outgoing>
     </bpmn:userTask>
