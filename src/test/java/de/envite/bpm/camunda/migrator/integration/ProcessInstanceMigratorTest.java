@@ -149,7 +149,7 @@ class ProcessInstanceMigratorTest {
     assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
     assertThat(processInstance2).isWaitingAtExactly("UserTask2");
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
