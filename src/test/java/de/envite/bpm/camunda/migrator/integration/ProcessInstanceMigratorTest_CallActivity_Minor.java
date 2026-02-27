@@ -15,7 +15,7 @@ import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtime
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
 
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigrator;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsMap;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
 import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import java.util.Collections;
 import java.util.List;
@@ -44,11 +44,11 @@ class ProcessInstanceMigratorTest_CallActivity_Minor {
   private static final ProcessEngineExtension extension =
       ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
 
-  private final MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+  private final MigrationInstructionsDefaultImpl migrationInstructions = new MigrationInstructionsDefaultImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
       ProcessInstanceMigrator.builder()
           .ofProcessEngine(processEngine())
-          .withGetMigrationInstructions(migrationInstructionsMap)
+          .withMigrationInstructions(migrationInstructions)
           .build();
 
   private ProcessDefinition parentProcessDefinition_1_0_0;
@@ -64,7 +64,7 @@ class ProcessInstanceMigratorTest_CallActivity_Minor {
         .list()
         .forEach(deployment -> repositoryService().deleteDeployment(deployment.getId(), true));
 
-    migrationInstructionsMap.clearInstructions();
+    migrationInstructions.clearInstructions();
   }
 
   @Test
@@ -131,7 +131,7 @@ class ProcessInstanceMigratorTest_CallActivity_Minor {
         getNewestDeployedProcessDefinitionId(CHILD_PROCESS_KEY, repositoryService());
     assertThat(childProcessDefinition_1_1_0.getVersionTag()).isEqualTo("1.1.0");
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructions.putInstructions(
         CHILD_PROCESS_KEY,
         Collections.singletonList(
             MinorMigrationInstructions.builder()
@@ -228,7 +228,7 @@ class ProcessInstanceMigratorTest_CallActivity_Minor {
         getNewestDeployedProcessDefinitionId(PARENT_PROCESS_KEY, repositoryService());
     assertThat(parentProcessDefinition_1_1_0.getVersionTag()).isEqualTo("1.1.0");
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructions.putInstructions(
         PARENT_PROCESS_KEY,
         Collections.singletonList(
             MinorMigrationInstructions.builder()
