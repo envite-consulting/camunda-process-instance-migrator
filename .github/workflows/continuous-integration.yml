@@ -52,7 +52,7 @@ jobs:
           mvn -B dependency:go-offline
           mvn -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JARS_NAME }}
           path: ${{ env.ARTIFACTS_JARS_PATH }}
@@ -82,14 +82,14 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_JARS_NAME }}
           path: ${{ env.ARTIFACTS_JARS_PATH }}
       - name: Test
         run: mvn -B verify -Dcheckstyle.skip
       - name: Upload JaCoCo Report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
@@ -122,7 +122,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_JARS_NAME }}
           path: ${{ env.ARTIFACTS_JARS_PATH }}
@@ -176,7 +176,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-*
           merge-multiple: true
