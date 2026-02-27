@@ -8,21 +8,25 @@ import static de.envite.bpm.camunda.migrator.integration.TestHelper.startProcess
 import static de.envite.bpm.camunda.migrator.integration.assertions.ProcessInstanceListAsserter.assertThat;
 import static de.envite.bpm.camunda.migrator.integration.assertions.TaskListAsserter.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.camunda.bpm.engine.test.assertions.bpmn.AbstractAssertions.processEngine;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.task;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
 
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigrator;
-import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsMap;
+import de.envite.bpm.camunda.migrator.instructions.MigrationInstructionsDefaultImpl;
+import de.envite.bpm.camunda.migrator.instructions.MigrationPropertiesDefaultImpl;
 import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.engine.runtime.Job;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.junit5.ProcessEngineExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -40,17 +44,25 @@ class ProcessInstanceMigratorTest_Minor {
       "test-processmodels/migrateable_processmodel_1_5_1.bpmn";
   private static final String MINOR_INCREASED_WITH_THIRD_TASK_PROCESS_MODEL_PATH =
       "test-processmodels/migrateable_processmodel_1_7_0.bpmn";
+  private static final String MINOR_1_1_0_PROCESS_MODEL_PATH =
+      "test-processmodels/migrateable_processmodel_1_1_0.bpmn";
+  private static final String MINOR_1_2_0_PROCESS_MODEL_PATH =
+      "test-processmodels/migrateable_processmodel_1_2_0.bpmn";
   private static final String PROCESS_DEFINITION_KEY = "MigrateableProcess";
 
   @RegisterExtension
   private static final ProcessEngineExtension extension =
       ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
 
-  private final MigrationInstructionsMap migrationInstructionsMap = new MigrationInstructionsMap();
+  private final MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
+      new MigrationInstructionsDefaultImpl();
+  private final MigrationPropertiesDefaultImpl migrationPropertiesDefaultImpl =
+      new MigrationPropertiesDefaultImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
       ProcessInstanceMigrator.builder()
           .ofProcessEngine(processEngine())
-          .withGetMigrationInstructions(migrationInstructionsMap)
+          .withMigrationInstructions(migrationInstructionsDefaultImpl)
+          .withMigrationProperties(migrationPropertiesDefaultImpl)
           .build();
 
   private ProcessDefinition initialProcessDefinition;
@@ -75,12 +87,17 @@ class ProcessInstanceMigratorTest_Minor {
     runtimeService().deleteProcessInstance(processInstance1.getId(), "noReason");
     runtimeService().deleteProcessInstance(processInstance2.getId(), "noReason");
 
+    managementService()
+        .createBatchQuery()
+        .list()
+        .forEach(batch -> managementService().deleteBatch(batch.getId(), true));
+
     repositoryService()
         .createDeploymentQuery()
         .list()
         .forEach(deployment -> repositoryService().deleteDeployment(deployment.getId()));
 
-    this.migrationInstructionsMap.clearInstructions();
+    this.migrationInstructionsDefaultImpl.clearInstructions();
   }
 
   @Test
@@ -130,7 +147,7 @@ class ProcessInstanceMigratorTest_Minor {
         .allTasksHaveKey("UserTask1")
         .allTasksHaveFormkey(null);
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
     processInstanceMigrator.migrateInstancesOfAllProcesses();
 
@@ -163,7 +180,7 @@ class ProcessInstanceMigratorTest_Minor {
         .allTasksHaveKey("UserTask1")
         .allTasksHaveFormkey(null);
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateFaultyMigrationInstructionsFor100To150());
     processInstanceMigrator.migrateInstancesOfAllProcesses();
 
@@ -196,9 +213,9 @@ class ProcessInstanceMigratorTest_Minor {
         .allTasksHaveKey("UserTask1")
         .allTasksHaveFormkey(null);
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionFor100To130());
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionFor130To150());
     processInstanceMigrator.migrateInstancesOfAllProcesses();
 
@@ -235,7 +252,7 @@ class ProcessInstanceMigratorTest_Minor {
         .oneTaskHasKey("UserTask2")
         .allTasksHaveFormkey(null);
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
     processInstanceMigrator.migrateInstancesOfAllProcesses();
 
@@ -272,7 +289,7 @@ class ProcessInstanceMigratorTest_Minor {
         .oneTaskHasKey("UserTask2")
         .allTasksHaveFormkey(null);
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
             MinorMigrationInstructions.builder()
@@ -295,6 +312,82 @@ class ProcessInstanceMigratorTest_Minor {
         .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
         .allTasksHaveKey("UserTask7")
         .numberOfTasksIs(2);
+  }
+
+  @Test
+  void
+      processInstanceMigrator_should_migrate_minor_with_custom_listeners_and_io_mappings_not_skipped() {
+    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
+    newestProcessDefinitionAfterRedeployment =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
+
+    migrationPropertiesDefaultImpl.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
+    migrationPropertiesDefaultImpl.putSkipIoMappings(PROCESS_DEFINITION_KEY, false);
+
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(getCurrentTasks(PROCESS_DEFINITION_KEY, taskService()))
+        .numberOfTasksIs(2)
+        .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
+        .allTasksHaveKey("UserTask2")
+        .allTasksHaveFormkey("Formkey2");
+  }
+
+  @Test
+  void processInstanceMigrator_should_migrate_minor_async() {
+    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
+    newestProcessDefinitionAfterRedeployment =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
+
+    migrationPropertiesDefaultImpl.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
+
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    managementService()
+        .createBatchQuery()
+        .list()
+        .forEach(
+            batch -> {
+              Job seedJob =
+                  managementService()
+                      .createJobQuery()
+                      .jobDefinitionId(batch.getSeedJobDefinitionId())
+                      .singleResult();
+              managementService().executeJob(seedJob.getId());
+
+              managementService()
+                  .createJobQuery()
+                  .jobDefinitionId(batch.getBatchJobDefinitionId())
+                  .list()
+                  .forEach(migrationJob -> managementService().executeJob(migrationJob.getId()));
+
+              Job monitorJob =
+                  managementService()
+                      .createJobQuery()
+                      .jobDefinitionId(batch.getMonitorJobDefinitionId())
+                      .singleResult();
+              managementService().executeJob(monitorJob.getId());
+            });
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(getCurrentTasks(PROCESS_DEFINITION_KEY, taskService()))
+        .numberOfTasksIs(2)
+        .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
+        .allTasksHaveKey("UserTask2")
+        .allTasksHaveFormkey("Formkey2");
   }
 
   private List<MinorMigrationInstructions> generateMigrationInstructionsFor100To150() {
@@ -335,5 +428,62 @@ class ProcessInstanceMigratorTest_Minor {
             .migrationInstructions(List.of(new MigrationInstructionImpl("UserTask3", "UserTask2")))
             .majorVersion(1)
             .build());
+  }
+
+  @Test
+  void processInstanceMigrator_should_migrate_all_process_instances_to_latest_minor() {
+    deployBPMNFromClasspathResource(MINOR_1_1_0_PROCESS_MODEL_PATH, repositoryService());
+    ProcessDefinition minorV1Definition =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+    assertThat(minorV1Definition.getVersionTag()).isEqualTo("1.1.0");
+
+    deployBPMNFromClasspathResource(MINOR_1_2_0_PROCESS_MODEL_PATH, repositoryService());
+    newestProcessDefinitionAfterRedeployment =
+        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.2.0");
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(initialProcessDefinition.getId());
+
+    complete(task(processInstance1));
+    complete(task(processInstance2));
+
+    complete(task(processInstance1));
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            MinorMigrationInstructions.builder()
+                .sourceMinorVersion(0)
+                .targetMinorVersion(1)
+                .migrationInstructions(
+                    List.of(new MigrationInstructionImpl("UserTask1", "UserTaskA")))
+                .majorVersion(1)
+                .build()));
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            MinorMigrationInstructions.builder()
+                .sourceMinorVersion(1)
+                .targetMinorVersion(2)
+                .migrationInstructions(
+                    List.of(new MigrationInstructionImpl("ReceiveTask1", "ReceiveTaskB")))
+                .majorVersion(1)
+                .build()));
+
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.2.0");
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTaskB");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
   }
 }

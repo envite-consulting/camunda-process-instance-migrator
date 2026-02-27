@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
 
-/** Default implementation for {@link GetMigrationInstructions}. */
+/** Default implementation for {@link MigrationInstructions}. */
 @Getter
-public class MigrationInstructionsMap implements GetMigrationInstructions {
+public class MigrationInstructionsDefaultImpl implements MigrationInstructions {
 
   private Map<String, List<MinorMigrationInstructions>> migrationInstructionMap;
 
-  public MigrationInstructionsMap() {
+  public MigrationInstructionsDefaultImpl() {
     this.migrationInstructionMap = new HashMap<>();
   }
 
@@ -22,12 +22,13 @@ public class MigrationInstructionsMap implements GetMigrationInstructions {
     this.migrationInstructionMap = new HashMap<>();
   }
 
-  public MigrationInstructionsMap putInstructions(
+  public MigrationInstructionsDefaultImpl putInstructions(
       String processDefinitionKey, List<MinorMigrationInstructions> instructions) {
     if (migrationInstructionMap.containsKey(processDefinitionKey)) {
       migrationInstructionMap.get(processDefinitionKey).addAll(instructions);
     } else {
-      // generate new ArrayList to guarantee support for structural modification (i.e. add)
+      // generate new ArrayList to guarantee support for structural modification (i.e.
+      // add)
       migrationInstructionMap.put(processDefinitionKey, new ArrayList<>(instructions));
     }
     return this;

@@ -1,7 +1,6 @@
 package de.envite.bpm.camunda.migrator.processmetadata;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
@@ -21,6 +20,6 @@ public class LoadProcessDefinitionKeysDefaultImpl implements LoadProcessDefiniti
         .list()
         .stream()
         .map(ProcessDefinition::getKey)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

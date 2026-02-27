@@ -26,6 +26,9 @@ dist/
 nbdist/
 .nb-gradle/
 
+### VS Code ###
+.vscode/
+
 camunda-db.mv.db
 
 ### RELEASE ###

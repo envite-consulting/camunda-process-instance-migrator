@@ -10,17 +10,21 @@ import static de.envite.bpm.camunda.migrator.integration.TestHelper.suspendProce
 import static de.envite.bpm.camunda.migrator.integration.assertions.ProcessInstanceListAsserter.assertThat;
 import static de.envite.bpm.camunda.migrator.integration.assertions.TaskListAsserter.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.task;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigrator;
+import de.envite.bpm.camunda.migrator.ProcessInstanceMigratorBuilder;
+import de.envite.bpm.camunda.migrator.instructions.MigrationPropertiesDefaultImpl;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.engine.runtime.Job;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.junit5.ProcessEngineExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +39,8 @@ class ProcessInstanceMigratorTest {
       "test-processmodels/migrateable_processmodel_1_0_0.bpmn";
   private static final String UPDATED_PROCESS_MODEL_PATH =
       "test-processmodels/migrateable_processmodel_1_0_1_with_formkeys.bpmn";
+  private static final String UPDATED_PROCESS_MODEL_PATH_1_0_2 =
+      "test-processmodels/migrateable_processmodel_1_0_2.bpmn";
   private static final String UPDATED_PROCESS_MODEL_PATH_WITH_SUBPROCESSES =
       "test-processmodels/migrateable_processmodel_1_0_2_with_subprocesses.bpmn";
   private static final String MINOR_INCREASED_PROCESS_MODEL_PATH =
@@ -47,8 +53,8 @@ class ProcessInstanceMigratorTest {
   private static final ProcessEngineExtension extension =
       ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
 
-  private final ProcessInstanceMigrator processInstanceMigrator =
-      ProcessInstanceMigrator.builder().ofProcessEngine(processEngine()).build();
+  private final ProcessInstanceMigratorBuilder processInstanceMigratorBuilder =
+      ProcessInstanceMigrator.builder().ofProcessEngine(processEngine());
 
   private ProcessDefinition initialProcessDefinition;
   private ProcessDefinition newestProcessDefinitionAfterRedeployment;
@@ -57,6 +63,10 @@ class ProcessInstanceMigratorTest {
 
   @AfterEach
   void cleanUp() {
+    managementService()
+        .createBatchQuery()
+        .list()
+        .forEach(batch -> managementService().deleteBatch(batch.getId(), true));
     repositoryService()
         .createDeploymentQuery()
         .list()
@@ -79,7 +89,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveName("Do something")
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -111,7 +121,7 @@ class ProcessInstanceMigratorTest {
     assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
     assertThat(processInstance2).isWaitingAtExactly("ReceiveTask1");
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -119,6 +129,36 @@ class ProcessInstanceMigratorTest {
 
     assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
     assertThat(processInstance2).isWaitingAtExactly("ReceiveTask1");
+  }
+
+  @Test
+  void processInstanceMigrator_should_migrate_all_process_instances_to_latest_patch() {
+    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
+    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH_1_0_2, "1.0.2");
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(initialProcessDefinition.getId());
+
+    complete(task(processInstance1));
+    complete(task(processInstance2));
+
+    complete(task(processInstance1));
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
+
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.0.2");
+
+    assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
+    assertThat(processInstance2).isWaitingAtExactly("UserTask2");
   }
 
   @Test
@@ -137,7 +177,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveName("Do something")
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -169,7 +209,7 @@ class ProcessInstanceMigratorTest {
     assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
     assertThat(processInstance2).isWaitingAtExactly("ReceiveTask1");
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -197,7 +237,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -226,7 +266,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -254,7 +294,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -280,7 +320,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -306,7 +346,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -333,7 +373,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -350,8 +390,12 @@ class ProcessInstanceMigratorTest {
     deployInitialProcessModelAndStartProcessInstances(
         NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION, null);
 
-    assertDoesNotThrow(
-        () -> processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY));
+    assertThatNoException()
+        .isThrownBy(
+            () ->
+                processInstanceMigratorBuilder
+                    .build()
+                    .migrateProcessInstances(PROCESS_DEFINITION_KEY));
   }
 
   @Test
@@ -370,7 +414,7 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -380,6 +424,82 @@ class ProcessInstanceMigratorTest {
         .numberOfTasksIs(2)
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
+  }
+
+  @Test
+  void
+      processInstanceMigrator_should_migrate_patch_with_custom_listeners_and_io_mappings_not_skipped() {
+    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
+    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+
+    MigrationPropertiesDefaultImpl migrationProperties = new MigrationPropertiesDefaultImpl();
+    migrationProperties.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
+    migrationProperties.putSkipIoMappings(PROCESS_DEFINITION_KEY, false);
+
+    processInstanceMigratorBuilder
+        .withMigrationProperties(migrationProperties)
+        .build()
+        .migrateProcessInstances(PROCESS_DEFINITION_KEY);
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(getCurrentTasks(PROCESS_DEFINITION_KEY, taskService()))
+        .numberOfTasksIs(2)
+        .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
+        .allTasksHaveName("Do something")
+        .allTasksHaveFormkey("Formkey1");
+  }
+
+  @Test
+  void processInstanceMigrator_should_migrate_patch_async() {
+    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
+    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+
+    MigrationPropertiesDefaultImpl migrationProperties = new MigrationPropertiesDefaultImpl();
+    migrationProperties.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
+
+    processInstanceMigratorBuilder
+        .withMigrationProperties(migrationProperties)
+        .build()
+        .migrateProcessInstances(PROCESS_DEFINITION_KEY);
+
+    managementService()
+        .createBatchQuery()
+        .list()
+        .forEach(
+            batch -> {
+              Job seedJob =
+                  managementService()
+                      .createJobQuery()
+                      .jobDefinitionId(batch.getSeedJobDefinitionId())
+                      .singleResult();
+              managementService().executeJob(seedJob.getId());
+
+              managementService()
+                  .createJobQuery()
+                  .jobDefinitionId(batch.getBatchJobDefinitionId())
+                  .list()
+                  .forEach(migrationJob -> managementService().executeJob(migrationJob.getId()));
+
+              Job monitorJob =
+                  managementService()
+                      .createJobQuery()
+                      .jobDefinitionId(batch.getMonitorJobDefinitionId())
+                      .singleResult();
+              managementService().executeJob(monitorJob.getId());
+            });
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(getCurrentTasks(PROCESS_DEFINITION_KEY, taskService()))
+        .numberOfTasksIs(2)
+        .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
+        .allTasksHaveName("Do something")
+        .allTasksHaveFormkey("Formkey1");
   }
 
   private void deployInitialProcessModelAndStartProcessInstances(

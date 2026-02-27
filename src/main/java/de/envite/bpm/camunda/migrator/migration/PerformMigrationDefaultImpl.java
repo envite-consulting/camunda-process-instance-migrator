@@ -6,6 +6,7 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.camunda.bpm.engine.impl.migration.MigrationPlanImpl;
 import org.camunda.bpm.engine.migration.MigrationPlan;
+import org.camunda.bpm.engine.migration.MigrationPlanExecutionBuilder;
 
 @RequiredArgsConstructor
 public class PerformMigrationDefaultImpl implements PerformMigration {
@@ -13,12 +14,32 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
   private final ProcessEngine processEngine;
 
   @Override
-  public void forPlanAndProcessInstanceId(CustomMigrationPlan plan, String processInstanceId) {
-    processEngine
-        .getRuntimeService()
-        .newMigration(mapToCamunda7MigrationPlan(plan))
-        .processInstanceIds(processInstanceId)
-        .execute();
+  public void forPlanAndProcessInstanceId(
+      CustomMigrationPlan plan,
+      String processInstanceId,
+      boolean skipCustomListeners,
+      boolean skipIoMappings,
+      boolean executeAsync) {
+
+    MigrationPlanExecutionBuilder executionBuilder =
+        processEngine
+            .getRuntimeService()
+            .newMigration(mapToCamunda7MigrationPlan(plan))
+            .processInstanceIds(processInstanceId);
+
+    if (skipCustomListeners) {
+      executionBuilder.skipCustomListeners();
+    }
+
+    if (skipIoMappings) {
+      executionBuilder.skipIoMappings();
+    }
+
+    if (executeAsync) {
+      executionBuilder.executeAsync();
+    } else {
+      executionBuilder.execute();
+    }
   }
 
   private MigrationPlan mapToCamunda7MigrationPlan(CustomMigrationPlan plan) {
