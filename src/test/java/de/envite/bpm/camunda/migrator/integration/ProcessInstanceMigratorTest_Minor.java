@@ -454,7 +454,7 @@ class ProcessInstanceMigratorTest_Minor {
     assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
     assertThat(processInstance2).isWaitingAtExactly("UserTask2");
 
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
             MinorMigrationInstructions.builder()
@@ -464,7 +464,7 @@ class ProcessInstanceMigratorTest_Minor {
                     List.of(new MigrationInstructionImpl("UserTask1", "UserTaskA")))
                 .majorVersion(1)
                 .build()));
-    migrationInstructionsMap.putInstructions(
+    migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
             MinorMigrationInstructions.builder()
