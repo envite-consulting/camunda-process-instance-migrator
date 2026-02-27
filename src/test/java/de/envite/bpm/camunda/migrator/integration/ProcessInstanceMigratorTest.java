@@ -11,7 +11,7 @@ import static de.envite.bpm.camunda.migrator.integration.assertions.ProcessInsta
 import static de.envite.bpm.camunda.migrator.integration.assertions.TaskListAsserter.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.camunda.bpm.engine.test.assertions.bpmn.AbstractAssertions.processEngine;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
