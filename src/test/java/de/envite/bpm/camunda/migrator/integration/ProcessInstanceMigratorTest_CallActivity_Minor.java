@@ -44,7 +44,8 @@ class ProcessInstanceMigratorTest_CallActivity_Minor {
   private static final ProcessEngineExtension extension =
       ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
 
-  private final MigrationInstructionsDefaultImpl migrationInstructions = new MigrationInstructionsDefaultImpl();
+  private final MigrationInstructionsDefaultImpl migrationInstructions =
+      new MigrationInstructionsDefaultImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
       ProcessInstanceMigrator.builder()
           .ofProcessEngine(processEngine())
