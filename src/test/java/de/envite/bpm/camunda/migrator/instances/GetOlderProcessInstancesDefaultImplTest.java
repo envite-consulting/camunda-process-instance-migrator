@@ -37,17 +37,17 @@ class GetOlderProcessInstancesDefaultImplTest {
   private static final String PROCESS_INSTANCE_1_ID = "4711";
   private static final String PROCESS_INSTANCE_2_ID = "4712";
 
-  @Mock ProcessEngine processEngine;
-  @InjectMocks GetOlderProcessInstancesDefaultImpl getOlderProcessInstancesDefaultImpl;
+  @Mock private ProcessEngine processEngine;
+  @InjectMocks private GetOlderProcessInstancesDefaultImpl getOlderProcessInstancesDefaultImpl;
 
-  @Mock RepositoryService repositoryService;
-  @Mock RuntimeService runtimeService;
+  @Mock private RepositoryService repositoryService;
+  @Mock private RuntimeService runtimeService;
 
-  @Mock ProcessDefinition processDefinitionResult1;
-  @Mock ProcessDefinition processDefinitionResult2;
-  @Mock ProcessDefinition processDefinitionResult3;
-  @Mock ProcessInstance processInstanceResult1;
-  @Mock ProcessInstance processInstanceResult2;
+  @Mock private ProcessDefinition processDefinitionResult1;
+  @Mock private ProcessDefinition processDefinitionResult2;
+  @Mock private ProcessDefinition processDefinitionResult3;
+  @Mock private ProcessInstance processInstanceResult1;
+  @Mock private ProcessInstance processInstanceResult2;
 
   @BeforeEach
   void setup() {
