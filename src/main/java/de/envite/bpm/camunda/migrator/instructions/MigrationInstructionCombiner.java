@@ -36,8 +36,9 @@ public class MigrationInstructionCombiner {
                           boolean migrationInstructionWasAlreadySet = false;
                           CustomMigrationInstruction instructionToReplace = null;
                           for (CustomMigrationInstruction alreadySetInstruction : instructionList) {
-                            if (alreadySetInstruction.getTargetActivityId()
-                                == migrationInstruction.getSourceActivityId()) {
+                            if (alreadySetInstruction
+                                .getTargetActivityId()
+                                .equals(migrationInstruction.getSourceActivityId())) {
                               migrationInstructionWasAlreadySet = true;
                               instructionToReplace = alreadySetInstruction;
                             }
