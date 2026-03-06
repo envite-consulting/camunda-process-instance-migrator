@@ -3,6 +3,7 @@ package de.envite.bpm.camunda.migrator.instructions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import de.envite.bpm.camunda.migrator.integration.TestHelper;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import java.util.Arrays;
 import java.util.List;
@@ -27,32 +28,23 @@ class MigrationInstructionCombinerTest {
   private static final String ACTIVITY_7 = "CallActivity1";
   private static final String ACTIVITY_8 = "CallActivity2";
 
-  @Mock MigrationInstruction migrationInstruction1;
-  @Mock MigrationInstruction migrationInstruction2;
-  @Mock MigrationInstruction migrationInstruction3;
-  @Mock MigrationInstruction migrationInstruction4;
+  @Mock private MigrationInstruction migrationInstruction1;
+  @Mock private MigrationInstruction migrationInstruction2;
+  @Mock private MigrationInstruction migrationInstruction3;
+  @Mock private MigrationInstruction migrationInstruction4;
 
-  MinorMigrationInstructions migrationInstructions1To2;
-
-  MinorMigrationInstructions migrationInstructions2To3;
+  private MinorMigrationInstructions migrationInstructions1To2;
+  private MinorMigrationInstructions migrationInstructions2To3;
 
   @BeforeEach()
   void setUp() {
     migrationInstructions1To2 =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(Arrays.asList(migrationInstruction1, migrationInstruction2))
-            .build();
+        TestHelper.createMinorMigrationInstructions(
+            MAJOR_VERSION, 1, 2, List.of(migrationInstruction1, migrationInstruction2));
 
     migrationInstructions2To3 =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(2)
-            .targetMinorVersion(3)
-            .migrationInstructions(Arrays.asList(migrationInstruction3, migrationInstruction4))
-            .build();
+        TestHelper.createMinorMigrationInstructions(
+            MAJOR_VERSION, 2, 3, List.of(migrationInstruction3, migrationInstruction4));
   }
 
   @Test

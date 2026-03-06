@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.envite.bpm.camunda.migrator.integration.TestHelper;
 import java.util.List;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RuntimeService;
@@ -37,17 +38,10 @@ class PerformMigrationDefaultImplTest {
   }
 
   private CustomMigrationPlan createPlan() {
-    return CustomMigrationPlan.builder()
-        .sourceProcessDefinitionId("source-def-id")
-        .targetProcessDefinitionId("target-def-id")
-        .instructions(
-            List.of(
-                CustomMigrationInstruction.builder()
-                    .sourceActivityId("activityA")
-                    .targetActivityId("activityB")
-                    .updateEventTrigger(false)
-                    .build()))
-        .build();
+    return TestHelper.createCustomMigrationPlan(
+        "source-def-id",
+        "target-def-id",
+        List.of(TestHelper.createCustomMigrationInstruction("activityA", "activityB", false)));
   }
 
   @Test

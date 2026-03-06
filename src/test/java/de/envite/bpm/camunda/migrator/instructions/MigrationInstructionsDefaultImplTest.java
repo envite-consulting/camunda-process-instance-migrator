@@ -2,6 +2,7 @@ package de.envite.bpm.camunda.migrator.instructions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import de.envite.bpm.camunda.migrator.integration.TestHelper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,11 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MigrationInstructionsDefaultImplTest {
 
+  private final MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
+      new MigrationInstructionsDefaultImpl();
+
   @Test
   void getApplicableMinorMigrationInstructions_should_return_empty_for_no_matching_process() {
-    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
-        new MigrationInstructionsDefaultImpl();
-
     List<MinorMigrationInstructions> result =
         migrationInstructionsDefaultImpl.getApplicableMinorMigrationInstructions(
             "processKey", 3, 4, 1);
@@ -24,16 +25,7 @@ class MigrationInstructionsDefaultImplTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_filter_by_target_minor_version() {
-    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
-        new MigrationInstructionsDefaultImpl();
-
-    MinorMigrationInstructions instruction =
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(1)
-            .targetMinorVersion(3)
-            .migrationInstructions(List.of())
-            .majorVersion(1)
-            .build();
+    MinorMigrationInstructions instruction = TestHelper.createMinorMigrationInstructions(1, 1, 3);
 
     migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
@@ -47,16 +39,7 @@ class MigrationInstructionsDefaultImplTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_filter_by_source_minor_version() {
-    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
-        new MigrationInstructionsDefaultImpl();
-
-    MinorMigrationInstructions instruction =
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(0)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .majorVersion(1)
-            .build();
+    MinorMigrationInstructions instruction = TestHelper.createMinorMigrationInstructions(1, 0, 2);
 
     migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
@@ -70,16 +53,7 @@ class MigrationInstructionsDefaultImplTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_filter_by_major_version() {
-    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
-        new MigrationInstructionsDefaultImpl();
-
-    MinorMigrationInstructions instruction =
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .majorVersion(2)
-            .build();
+    MinorMigrationInstructions instruction = TestHelper.createMinorMigrationInstructions(2, 1, 2);
 
     migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
@@ -93,16 +67,7 @@ class MigrationInstructionsDefaultImplTest {
 
   @Test
   void getApplicableMinorMigrationInstructions_should_return_matching_instructions() {
-    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
-        new MigrationInstructionsDefaultImpl();
-
-    MinorMigrationInstructions instruction =
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .majorVersion(1)
-            .build();
+    MinorMigrationInstructions instruction = TestHelper.createMinorMigrationInstructions(1, 1, 2);
 
     migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
 
@@ -118,24 +83,8 @@ class MigrationInstructionsDefaultImplTest {
 
   @Test
   void putInstructions_should_append_when_key_already_exists() {
-    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
-        new MigrationInstructionsDefaultImpl();
-
-    MinorMigrationInstructions instruction1 =
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .majorVersion(1)
-            .build();
-
-    MinorMigrationInstructions instruction2 =
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(2)
-            .targetMinorVersion(3)
-            .migrationInstructions(List.of())
-            .majorVersion(1)
-            .build();
+    MinorMigrationInstructions instruction1 = TestHelper.createMinorMigrationInstructions(1, 1, 2);
+    MinorMigrationInstructions instruction2 = TestHelper.createMinorMigrationInstructions(1, 2, 3);
 
     migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction1));
     migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction2));
@@ -149,16 +98,7 @@ class MigrationInstructionsDefaultImplTest {
 
   @Test
   void clearInstructions_should_remove_all_instructions() {
-    MigrationInstructionsDefaultImpl migrationInstructionsDefaultImpl =
-        new MigrationInstructionsDefaultImpl();
-
-    MinorMigrationInstructions instruction =
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .majorVersion(1)
-            .build();
+    MinorMigrationInstructions instruction = TestHelper.createMinorMigrationInstructions(1, 1, 2);
 
     migrationInstructionsDefaultImpl.putInstructions("processKey", List.of(instruction));
     migrationInstructionsDefaultImpl.clearInstructions();

@@ -30,16 +30,16 @@ class MigrationInstructionsAdderTest {
   private static final String ACTIVITY_5 = "ReceiveTask1";
   private static final String ACTIVITY_6 = "ReceiveTask2";
 
-  @Mock CustomMigrationPlan migrationPlan;
+  @Mock private CustomMigrationPlan migrationPlan;
 
-  @Spy List<CustomMigrationInstruction> migrationPlanInstructionList = new ArrayList<>();
+  @Spy private List<CustomMigrationInstruction> migrationPlanInstructionList = new ArrayList<>();
 
-  List<CustomMigrationInstruction> instructionList;
+  private List<CustomMigrationInstruction> instructionList;
 
-  @Mock CustomMigrationInstruction migrationInstruction1;
-  @Mock CustomMigrationInstruction migrationInstruction2;
-  @Mock CustomMigrationInstruction migrationInstruction3;
-  @Mock CustomMigrationInstruction migrationInstruction4;
+  @Mock private CustomMigrationInstruction migrationInstruction1;
+  @Mock private CustomMigrationInstruction migrationInstruction2;
+  @Mock private CustomMigrationInstruction migrationInstruction3;
+  @Mock private CustomMigrationInstruction migrationInstruction4;
 
   @Captor private ArgumentCaptor<List<CustomMigrationInstruction>> migrationInstructionCaptor;
 
