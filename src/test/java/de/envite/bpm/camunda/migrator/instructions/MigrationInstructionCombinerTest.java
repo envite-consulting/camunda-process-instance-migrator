@@ -139,7 +139,8 @@ class MigrationInstructionCombinerTest {
             .variables(Map.of("key", "value"))
             .build();
 
-    Map<String, Object> result = MigrationInstructionCombiner.combineVariables(List.of(instructions));
+    Map<String, Object> result =
+        MigrationInstructionCombiner.combineVariables(List.of(instructions));
 
     assertThat(result).containsEntry("key", "value");
   }

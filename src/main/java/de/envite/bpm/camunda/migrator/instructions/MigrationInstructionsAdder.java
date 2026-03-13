@@ -55,12 +55,12 @@ public class MigrationInstructionsAdder {
 
   /**
    * Modifies a given instance of {@link CustomMigrationPlan} by adding a map of variables.
+   *
    * @param migrationPlan the plan to be modified
    * @param variables the variables to be added to the original plan.
    */
   public static void addVariables(
-      CustomMigrationPlan migrationPlan,
-      Map<String,Object> variables) {
+      CustomMigrationPlan migrationPlan, Map<String, Object> variables) {
     migrationPlan.getVariables().clear();
     migrationPlan.getVariables().putAll(variables);
   }

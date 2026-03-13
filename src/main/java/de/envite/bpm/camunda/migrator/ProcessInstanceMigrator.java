@@ -104,9 +104,9 @@ public class ProcessInstanceMigrator {
 
           MigrationInstructionsAdder.addInstructions(
               migrationPlan, executableMigrationInstructions);
-          MigrationInstructionsAdder.addVariables(migrationPlan, MigrationInstructionCombiner.combineVariables(
-              applicableMinorMigrationInstructions));
-          
+          MigrationInstructionsAdder.addVariables(
+              migrationPlan,
+              MigrationInstructionCombiner.combineVariables(applicableMinorMigrationInstructions));
         }
         if (migrationPlan != null) {
           try {

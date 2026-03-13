@@ -3,7 +3,6 @@ package de.envite.bpm.camunda.migrator.plan;
 import de.envite.bpm.camunda.migrator.instances.VersionedProcessInstance;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationPlan;
-
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

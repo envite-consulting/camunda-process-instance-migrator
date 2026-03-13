@@ -2,7 +2,6 @@ package de.envite.bpm.camunda.migrator.migration;
 
 import java.util.List;
 import java.util.Map;
-
 import lombok.Builder;
 import lombok.Getter;
 

@@ -77,5 +77,4 @@ public class MigrationInstructionCombiner {
         .forEach(m -> combined.putAll(m.getVariables()));
     return combined;
   }
-
 }

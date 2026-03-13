@@ -120,7 +120,8 @@ class PerformMigrationDefaultImplTest {
             .sourceProcessDefinitionId("source-def-id")
             .targetProcessDefinitionId("target-def-id")
             .instructions(
-                List.of(TestHelper.createCustomMigrationInstruction("activityA", "activityB", false)))
+                List.of(
+                    TestHelper.createCustomMigrationInstruction("activityA", "activityB", false)))
             .variables(new HashMap<>(Map.of("myVar", "myValue")))
             .build();
 
