@@ -7,6 +7,7 @@ import de.envite.bpm.camunda.migrator.integration.TestHelper;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.camunda.bpm.engine.migration.MigrationInstruction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -118,5 +119,108 @@ class MigrationInstructionCombinerTest {
             migrationInstruction ->
                 migrationInstruction.getSourceActivityId() == ACTIVITY_7
                     && migrationInstruction.getTargetActivityId() == ACTIVITY_8);
+  }
+
+  @Test
+  void combineVariables_should_return_empty_map_for_empty_list() {
+    Map<String, Object> result = MigrationInstructionCombiner.combineVariables(List.of());
+
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  void combineVariables_should_return_variables_from_single_instruction() {
+    MinorMigrationInstructions instructions =
+        MinorMigrationInstructions.builder()
+            .majorVersion(MAJOR_VERSION)
+            .sourceMinorVersion(1)
+            .targetMinorVersion(2)
+            .migrationInstructions(List.of())
+            .variables(Map.of("key", "value"))
+            .build();
+
+    Map<String, Object> result = MigrationInstructionCombiner.combineVariables(List.of(instructions));
+
+    assertThat(result).containsEntry("key", "value");
+  }
+
+  @Test
+  void combineVariables_should_merge_variables_from_multiple_instructions() {
+    MinorMigrationInstructions instructions1To2 =
+        MinorMigrationInstructions.builder()
+            .majorVersion(MAJOR_VERSION)
+            .sourceMinorVersion(1)
+            .targetMinorVersion(2)
+            .migrationInstructions(List.of())
+            .variables(Map.of("a", "1"))
+            .build();
+
+    MinorMigrationInstructions instructions2To3 =
+        MinorMigrationInstructions.builder()
+            .majorVersion(MAJOR_VERSION)
+            .sourceMinorVersion(2)
+            .targetMinorVersion(3)
+            .migrationInstructions(List.of())
+            .variables(Map.of("b", "2"))
+            .build();
+
+    Map<String, Object> result =
+        MigrationInstructionCombiner.combineVariables(
+            Arrays.asList(instructions1To2, instructions2To3));
+
+    assertThat(result).containsEntry("a", "1").containsEntry("b", "2");
+  }
+
+  @Test
+  void combineVariables_should_have_later_minor_version_win_on_key_conflict() {
+    MinorMigrationInstructions instructions1To2 =
+        MinorMigrationInstructions.builder()
+            .majorVersion(MAJOR_VERSION)
+            .sourceMinorVersion(1)
+            .targetMinorVersion(2)
+            .migrationInstructions(List.of())
+            .variables(Map.of("key", "old"))
+            .build();
+
+    MinorMigrationInstructions instructions2To3 =
+        MinorMigrationInstructions.builder()
+            .majorVersion(MAJOR_VERSION)
+            .sourceMinorVersion(2)
+            .targetMinorVersion(3)
+            .migrationInstructions(List.of())
+            .variables(Map.of("key", "new"))
+            .build();
+
+    Map<String, Object> result =
+        MigrationInstructionCombiner.combineVariables(
+            Arrays.asList(instructions1To2, instructions2To3));
+
+    assertThat(result).containsEntry("key", "new").hasSize(1);
+  }
+
+  @Test
+  void combineVariables_should_skip_instructions_with_null_variables() {
+    MinorMigrationInstructions withNullVariables =
+        MinorMigrationInstructions.builder()
+            .majorVersion(MAJOR_VERSION)
+            .sourceMinorVersion(1)
+            .targetMinorVersion(2)
+            .migrationInstructions(List.of())
+            .build();
+
+    MinorMigrationInstructions withVariables =
+        MinorMigrationInstructions.builder()
+            .majorVersion(MAJOR_VERSION)
+            .sourceMinorVersion(2)
+            .targetMinorVersion(3)
+            .migrationInstructions(List.of())
+            .variables(Map.of("a", "1"))
+            .build();
+
+    Map<String, Object> result =
+        MigrationInstructionCombiner.combineVariables(
+            Arrays.asList(withNullVariables, withVariables));
+
+    assertThat(result).containsEntry("a", "1").hasSize(1);
   }
 }

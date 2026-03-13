@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationPlan;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -129,5 +131,37 @@ class MigrationInstructionsAdderTest {
             instruction ->
                 instruction.getSourceActivityId() == ACTIVITY_5
                     && instruction.getTargetActivityId() == ACTIVITY_6);
+  }
+
+  @Test
+  void addVariables_should_put_variables_into_plan() {
+    CustomMigrationPlan plan =
+        CustomMigrationPlan.builder()
+            .sourceProcessDefinitionId("source")
+            .targetProcessDefinitionId("target")
+            .instructions(new ArrayList<>())
+            .variables(new HashMap<>())
+            .build();
+
+    MigrationInstructionsAdder.addVariables(plan, Map.of("a", "1", "b", "2"));
+
+    assertThat(plan.getVariables()).containsEntry("a", "1").containsEntry("b", "2");
+  }
+
+  @Test
+  void addVariables_should_clear_existing_variables_before_adding() {
+    Map<String, Object> existingVariables = new HashMap<>();
+    existingVariables.put("old", "x");
+    CustomMigrationPlan plan =
+        CustomMigrationPlan.builder()
+            .sourceProcessDefinitionId("source")
+            .targetProcessDefinitionId("target")
+            .instructions(new ArrayList<>())
+            .variables(existingVariables)
+            .build();
+
+    MigrationInstructionsAdder.addVariables(plan, Map.of("new", "y"));
+
+    assertThat(plan.getVariables()).containsEntry("new", "y").doesNotContainKey("old").hasSize(1);
   }
 }

@@ -3,7 +3,9 @@ package de.envite.bpm.camunda.migrator.instructions;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MigrationInstructionCombiner {
 
@@ -65,4 +67,15 @@ public class MigrationInstructionCombiner {
                         }));
     return instructionList;
   }
+
+  public static Map<String, Object> combineVariables(
+      List<MinorMigrationInstructions> applicableMinorMigrationInstructions) {
+    Map<String, Object> combined = new HashMap<>();
+    applicableMinorMigrationInstructions.stream()
+        .sorted(Comparator.comparingInt(MinorMigrationInstructions::getSourceMinorVersion))
+        .filter(m -> m.getVariables() != null)
+        .forEach(m -> combined.putAll(m.getVariables()));
+    return combined;
+  }
+
 }
