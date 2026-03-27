@@ -4,6 +4,7 @@ import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationPlan;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MigrationInstructionsAdder {
 
@@ -50,5 +51,17 @@ public class MigrationInstructionsAdder {
     }
     migrationPlanList.clear();
     migrationPlanList.addAll(instructionsToBeAddedInTheEnd);
+  }
+
+  /**
+   * Modifies a given instance of {@link CustomMigrationPlan} by adding a map of variables.
+   *
+   * @param migrationPlan the plan to be modified
+   * @param variables the variables to be added to the original plan.
+   */
+  public static void addVariables(
+      CustomMigrationPlan migrationPlan, Map<String, Object> variables) {
+    migrationPlan.getVariables().clear();
+    migrationPlan.getVariables().putAll(variables);
   }
 }
