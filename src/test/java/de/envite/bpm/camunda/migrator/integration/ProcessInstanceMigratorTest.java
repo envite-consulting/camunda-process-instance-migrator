@@ -1,10 +1,7 @@
 package de.envite.bpm.camunda.migrator.integration;
 
-import static de.envite.bpm.camunda.migrator.integration.TestHelper.deployBPMNFromClasspathResource;
 import static de.envite.bpm.camunda.migrator.integration.TestHelper.getCurrentTasks;
-import static de.envite.bpm.camunda.migrator.integration.TestHelper.getNewestDeployedProcessDefinitionId;
 import static de.envite.bpm.camunda.migrator.integration.TestHelper.getRunningProcessInstances;
-import static de.envite.bpm.camunda.migrator.integration.TestHelper.startProcessInstance;
 import static de.envite.bpm.camunda.migrator.integration.TestHelper.suspendProcessDefinition;
 import static de.envite.bpm.camunda.migrator.integration.TestHelper.suspendProcessInstance;
 import static de.envite.bpm.camunda.migrator.integration.assertions.ProcessInstanceListAsserter.assertThat;
@@ -23,6 +20,7 @@ import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskSer
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigrator;
 import de.envite.bpm.camunda.migrator.ProcessInstanceMigratorBuilder;
 import de.envite.bpm.camunda.migrator.instructions.MigrationPropertiesDefaultImpl;
+import java.util.List;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.Job;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -76,8 +74,16 @@ class ProcessInstanceMigratorTest {
   @Test
   void
       processInstanceMigrator_should_migrate_all_process_instances_sitting_at_user_tasks_to_higher_patch() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -105,8 +111,21 @@ class ProcessInstanceMigratorTest {
   @Test
   void
       processInstanceMigrator_should_migrate_all_process_instances_sitting_at_receive_tasks_to_higher_patch() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
+
+    List<ProcessInstance> instances =
+        getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService());
+    processInstance1 = instances.get(0);
+    processInstance2 = instances.get(1);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -133,9 +152,24 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_migrate_all_process_instances_to_latest_patch() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH_1_0_2, "1.0.2");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH_1_0_2, "1.0.2", PROCESS_DEFINITION_KEY, repositoryService());
+
+    List<ProcessInstance> instances =
+        getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService());
+    processInstance1 = instances.get(0);
+    processInstance2 = instances.get(1);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -164,8 +198,19 @@ class ProcessInstanceMigratorTest {
   @Test
   void
       processInstanceMigrator_should_not_migrate_process_instances_sitting_at_user_tasks_to_higher_patch_if_target_is_in_subprocess() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH_WITH_SUBPROCESSES, "1.0.2");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH_WITH_SUBPROCESSES,
+            "1.0.2",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -193,8 +238,24 @@ class ProcessInstanceMigratorTest {
   @Test
   void
       processInstanceMigrator_should_not_migrate_process_instances_sitting_at_receive_tasks_to_higher_patch_if_target_is_in_subprocess() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH_WITH_SUBPROCESSES, "1.0.2");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH_WITH_SUBPROCESSES,
+            "1.0.2",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
+
+    List<ProcessInstance> instances =
+        getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService());
+    processInstance1 = instances.get(0);
+    processInstance2 = instances.get(1);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -221,11 +282,25 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_migrate_suspended_process_instances() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+
+    List<ProcessInstance> instances =
+        getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService());
+    processInstance1 = instances.get(0);
+    processInstance2 = instances.get(1);
+
     suspendProcessInstance(processInstance1, runtimeService());
     suspendProcessInstance(processInstance2, runtimeService());
 
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -252,10 +327,18 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_migrate_from_suspended_process_definitions() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
     suspendProcessDefinition(initialProcessDefinition, repositoryService());
 
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -280,8 +363,16 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_not_migrate_to_suspended_process_definitions() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
 
     suspendProcessDefinition(newestProcessDefinitionAfterRedeployment, repositoryService());
 
@@ -308,8 +399,19 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_not_migrate_to_higher_minor_version() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(MINOR_INCREASED_PROCESS_MODEL_PATH, "1.5.0");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -334,8 +436,19 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_not_migrate_to_higher_major_version() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(MAJOR_INCREASED_PROCESS_MODEL_PATH, "2.0.0");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            MAJOR_INCREASED_PROCESS_MODEL_PATH,
+            "2.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -361,8 +474,19 @@ class ProcessInstanceMigratorTest {
   @Test
   void
       processInstanceMigrator_should_not_migrate_process_instances_to_models_without_version_tag() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION, null);
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION,
+            null,
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -387,8 +511,13 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_not_fail_if_only_process_models_without_version_tag_exist() {
-    deployInitialProcessModelAndStartProcessInstances(
-        NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION, null);
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION,
+            null,
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
 
     assertThatNoException()
         .isThrownBy(
@@ -401,9 +530,16 @@ class ProcessInstanceMigratorTest {
   @Test
   void
       processInstanceMigrator_should_not_migrate_instances_from_process_models_without_version_tag() {
-    deployInitialProcessModelAndStartProcessInstances(
-        NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION, null);
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            NON_MIGRATEABLE_PROCESS_MODEL_WITHOUT_VERSION,
+            null,
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -429,8 +565,16 @@ class ProcessInstanceMigratorTest {
   @Test
   void
       processInstanceMigrator_should_migrate_patch_with_custom_listeners_and_io_mappings_not_skipped() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
 
     MigrationPropertiesDefaultImpl migrationProperties = new MigrationPropertiesDefaultImpl();
     migrationProperties.putSkipCustomListeners(PROCESS_DEFINITION_KEY, false);
@@ -454,8 +598,16 @@ class ProcessInstanceMigratorTest {
 
   @Test
   void processInstanceMigrator_should_migrate_patch_async() {
-    deployInitialProcessModelAndStartProcessInstances(MIGRATEABLE_PROCESS_MODEL_PATH, "1.0.0");
-    deployNewProcessModel(UPDATED_PROCESS_MODEL_PATH, "1.0.1");
+    initialProcessDefinition =
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            UPDATED_PROCESS_MODEL_PATH, "1.0.1", PROCESS_DEFINITION_KEY, repositoryService());
 
     MigrationPropertiesDefaultImpl migrationProperties = new MigrationPropertiesDefaultImpl();
     migrationProperties.putExecuteAsync(PROCESS_DEFINITION_KEY, true);
@@ -500,24 +652,5 @@ class ProcessInstanceMigratorTest {
         .allTasksHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId())
         .allTasksHaveName("Do something")
         .allTasksHaveFormkey("Formkey1");
-  }
-
-  private void deployInitialProcessModelAndStartProcessInstances(
-      String processModelPath, String expectedVersionTag) {
-    deployBPMNFromClasspathResource(processModelPath, repositoryService());
-    initialProcessDefinition =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(initialProcessDefinition.getVersionTag()).isEqualTo(expectedVersionTag);
-
-    processInstance1 = startProcessInstance(PROCESS_DEFINITION_KEY, runtimeService());
-    processInstance2 = startProcessInstance(PROCESS_DEFINITION_KEY, runtimeService());
-  }
-
-  private void deployNewProcessModel(String processModelPath, String expectedVersionTag) {
-    deployBPMNFromClasspathResource(processModelPath, repositoryService());
-    newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag())
-        .isEqualTo(expectedVersionTag);
   }
 }

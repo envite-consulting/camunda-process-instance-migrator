@@ -3,7 +3,9 @@ package de.envite.bpm.camunda.migrator.instructions;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MigrationInstructionCombiner {
 
@@ -36,8 +38,9 @@ public class MigrationInstructionCombiner {
                           boolean migrationInstructionWasAlreadySet = false;
                           CustomMigrationInstruction instructionToReplace = null;
                           for (CustomMigrationInstruction alreadySetInstruction : instructionList) {
-                            if (alreadySetInstruction.getTargetActivityId()
-                                == migrationInstruction.getSourceActivityId()) {
+                            if (alreadySetInstruction
+                                .getTargetActivityId()
+                                .equals(migrationInstruction.getSourceActivityId())) {
                               migrationInstructionWasAlreadySet = true;
                               instructionToReplace = alreadySetInstruction;
                             }
@@ -63,5 +66,15 @@ public class MigrationInstructionCombiner {
                           }
                         }));
     return instructionList;
+  }
+
+  public static Map<String, Object> combineVariables(
+      List<MinorMigrationInstructions> applicableMinorMigrationInstructions) {
+    Map<String, Object> combined = new HashMap<>();
+    applicableMinorMigrationInstructions.stream()
+        .sorted(Comparator.comparingInt(MinorMigrationInstructions::getSourceMinorVersion))
+        .filter(m -> m.getVariables() != null)
+        .forEach(m -> combined.putAll(m.getVariables()));
+    return combined;
   }
 }

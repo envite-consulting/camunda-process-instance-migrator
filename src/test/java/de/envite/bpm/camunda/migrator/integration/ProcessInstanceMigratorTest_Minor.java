@@ -1,10 +1,7 @@
 package de.envite.bpm.camunda.migrator.integration;
 
-import static de.envite.bpm.camunda.migrator.integration.TestHelper.deployBPMNFromClasspathResource;
 import static de.envite.bpm.camunda.migrator.integration.TestHelper.getCurrentTasks;
-import static de.envite.bpm.camunda.migrator.integration.TestHelper.getNewestDeployedProcessDefinitionId;
 import static de.envite.bpm.camunda.migrator.integration.TestHelper.getRunningProcessInstances;
-import static de.envite.bpm.camunda.migrator.integration.TestHelper.startProcessInstance;
 import static de.envite.bpm.camunda.migrator.integration.assertions.ProcessInstanceListAsserter.assertThat;
 import static de.envite.bpm.camunda.migrator.integration.assertions.TaskListAsserter.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +21,7 @@ import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.Job;
@@ -72,14 +70,17 @@ class ProcessInstanceMigratorTest_Minor {
 
   @BeforeEach
   void setUp() {
-    deployBPMNFromClasspathResource(MIGRATEABLE_PROCESS_MODEL_PATH, repositoryService());
-    // this will refer to the initial process Model
     initialProcessDefinition =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(initialProcessDefinition.getVersionTag()).isEqualTo("1.0.0");
-
-    processInstance1 = startProcessInstance(PROCESS_DEFINITION_KEY, runtimeService());
-    processInstance2 = startProcessInstance(PROCESS_DEFINITION_KEY, runtimeService());
+        TestHelper.deployInitialProcessModelAndStartProcessInstances(
+            MIGRATEABLE_PROCESS_MODEL_PATH,
+            "1.0.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService(),
+            runtimeService());
+    List<ProcessInstance> instances =
+        getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService());
+    processInstance1 = instances.get(0);
+    processInstance2 = instances.get(1);
   }
 
   @AfterEach
@@ -103,10 +104,12 @@ class ProcessInstanceMigratorTest_Minor {
   @Test
   void
       processInstanceMigrator_should_not_migrate_to_higher_minor_version_if_no_migration_plan_was_provided() {
-    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.5.0");
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -132,10 +135,12 @@ class ProcessInstanceMigratorTest_Minor {
   @Test
   void
       processInstanceMigrator_should_migrate_to_higher_minor_version_if_migration_plan_was_provided() {
-    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.5.0");
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -165,10 +170,12 @@ class ProcessInstanceMigratorTest_Minor {
   @Test
   void
       processInstanceMigrator_should_not_migrate_if_migration_to_higher_minor_version_has_faulty_migration_instructions() {
-    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.5.0");
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -198,10 +205,12 @@ class ProcessInstanceMigratorTest_Minor {
   @Test
   void
       processInstanceMigrator_should_migrate_to_higher_minor_by_adding_up_migration_instructions() {
-    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.5.0");
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -233,11 +242,12 @@ class ProcessInstanceMigratorTest_Minor {
   @Test
   void
       processInstanceMigrator_should_migrate_to_higher_minor_and_patch_version_using_only_minor_migration_plan() {
-    deployBPMNFromClasspathResource(
-        MINOR_INCREASED_AND_PATCHED_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.5.1");
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_AND_PATCHED_PROCESS_MODEL_PATH,
+            "1.5.1",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -270,11 +280,12 @@ class ProcessInstanceMigratorTest_Minor {
   @Test
   void
       processInstanceMigrator_should_migrate_to_mapped_id_even_if_same_id_still_exists_in_target() {
-    deployBPMNFromClasspathResource(
-        MINOR_INCREASED_WITH_THIRD_TASK_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.7.0");
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_WITH_THIRD_TASK_PROCESS_MODEL_PATH,
+            "1.7.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -317,9 +328,12 @@ class ProcessInstanceMigratorTest_Minor {
   @Test
   void
       processInstanceMigrator_should_migrate_minor_with_custom_listeners_and_io_mappings_not_skipped() {
-    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
@@ -342,9 +356,12 @@ class ProcessInstanceMigratorTest_Minor {
 
   @Test
   void processInstanceMigrator_should_migrate_minor_async() {
-    deployBPMNFromClasspathResource(MINOR_INCREASED_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
 
     migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateMigrationInstructionsFor100To150());
@@ -392,55 +409,107 @@ class ProcessInstanceMigratorTest_Minor {
 
   private List<MinorMigrationInstructions> generateMigrationInstructionsFor100To150() {
     return Collections.singletonList(
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(0)
-            .targetMinorVersion(5)
-            .migrationInstructions(List.of(new MigrationInstructionImpl("UserTask1", "UserTask2")))
-            .majorVersion(1)
-            .build());
+        TestHelper.createMinorMigrationInstructions(
+            1, 5, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTask2"))));
   }
 
   private List<MinorMigrationInstructions> generateFaultyMigrationInstructionsFor100To150() {
     return Collections.singletonList(
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(0)
-            .targetMinorVersion(5)
-            .migrationInstructions(List.of(new MigrationInstructionImpl("UserTask1", "UserTask6")))
-            .majorVersion(1)
-            .build());
+        TestHelper.createMinorMigrationInstructions(
+            1, 5, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTask6"))));
   }
 
   private List<MinorMigrationInstructions> generateMigrationInstructionFor100To130() {
     return Collections.singletonList(
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(0)
-            .targetMinorVersion(3)
-            .migrationInstructions(List.of(new MigrationInstructionImpl("UserTask1", "UserTask3")))
-            .majorVersion(1)
-            .build());
+        TestHelper.createMinorMigrationInstructions(
+            1, 3, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTask3"))));
   }
 
   private List<MinorMigrationInstructions> generateMigrationInstructionFor130To150() {
     return Collections.singletonList(
-        MinorMigrationInstructions.builder()
-            .sourceMinorVersion(3)
-            .targetMinorVersion(5)
-            .migrationInstructions(List.of(new MigrationInstructionImpl("UserTask3", "UserTask2")))
-            .majorVersion(1)
-            .build());
+        TestHelper.createMinorMigrationInstructions(
+            1, 5, 3, List.of(new MigrationInstructionImpl("UserTask3", "UserTask2"))));
+  }
+
+  @Test
+  void processInstanceMigrator_should_set_variables_when_migrating_to_higher_minor_version() {
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            TestHelper.createMinorMigrationInstructions(
+                1,
+                5,
+                0,
+                List.of(new MigrationInstructionImpl("UserTask1", "UserTask2")),
+                Map.of("newVar", "newValue"))));
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(runtimeService().getVariables(processInstance1.getId()))
+        .containsEntry("newVar", "newValue");
+    assertThat(runtimeService().getVariables(processInstance2.getId()))
+        .containsEntry("newVar", "newValue");
+  }
+
+  @Test
+  void processInstanceMigrator_should_set_merged_variables_from_multiple_minor_migration_steps() {
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            TestHelper.createMinorMigrationInstructions(
+                1,
+                3,
+                0,
+                List.of(new MigrationInstructionImpl("UserTask1", "UserTask3")),
+                Map.of("firstStepVar", "firstValue"))));
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            TestHelper.createMinorMigrationInstructions(
+                1,
+                5,
+                3,
+                List.of(new MigrationInstructionImpl("UserTask3", "UserTask2")),
+                Map.of("secondStepVar", "secondValue"))));
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(runtimeService().getVariables(processInstance1.getId()))
+        .containsEntry("firstStepVar", "firstValue")
+        .containsEntry("secondStepVar", "secondValue");
+    assertThat(runtimeService().getVariables(processInstance2.getId()))
+        .containsEntry("firstStepVar", "firstValue")
+        .containsEntry("secondStepVar", "secondValue");
   }
 
   @Test
   void processInstanceMigrator_should_migrate_all_process_instances_to_latest_minor() {
-    deployBPMNFromClasspathResource(MINOR_1_1_0_PROCESS_MODEL_PATH, repositoryService());
-    ProcessDefinition minorV1Definition =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(minorV1Definition.getVersionTag()).isEqualTo("1.1.0");
+    TestHelper.deployNewProcessModel(
+        MINOR_1_1_0_PROCESS_MODEL_PATH, "1.1.0", PROCESS_DEFINITION_KEY, repositoryService());
 
-    deployBPMNFromClasspathResource(MINOR_1_2_0_PROCESS_MODEL_PATH, repositoryService());
     newestProcessDefinitionAfterRedeployment =
-        getNewestDeployedProcessDefinitionId(PROCESS_DEFINITION_KEY, repositoryService());
-    assertThat(newestProcessDefinitionAfterRedeployment.getVersionTag()).isEqualTo("1.2.0");
+        TestHelper.deployNewProcessModel(
+            MINOR_1_2_0_PROCESS_MODEL_PATH, "1.2.0", PROCESS_DEFINITION_KEY, repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -457,23 +526,13 @@ class ProcessInstanceMigratorTest_Minor {
     migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
-            MinorMigrationInstructions.builder()
-                .sourceMinorVersion(0)
-                .targetMinorVersion(1)
-                .migrationInstructions(
-                    List.of(new MigrationInstructionImpl("UserTask1", "UserTaskA")))
-                .majorVersion(1)
-                .build()));
+            TestHelper.createMinorMigrationInstructions(
+                1, 1, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTaskA")))));
     migrationInstructionsDefaultImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
-            MinorMigrationInstructions.builder()
-                .sourceMinorVersion(1)
-                .targetMinorVersion(2)
-                .migrationInstructions(
-                    List.of(new MigrationInstructionImpl("ReceiveTask1", "ReceiveTaskB")))
-                .majorVersion(1)
-                .build()));
+            TestHelper.createMinorMigrationInstructions(
+                1, 2, 1, List.of(new MigrationInstructionImpl("ReceiveTask1", "ReceiveTaskB")))));
 
     processInstanceMigrator.migrateInstancesOfAllProcesses();
 
