@@ -21,6 +21,7 @@ import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.Job;
@@ -428,6 +429,77 @@ class ProcessInstanceMigratorTest_Minor {
     return Collections.singletonList(
         TestHelper.createMinorMigrationInstructions(
             1, 5, 3, List.of(new MigrationInstructionImpl("UserTask3", "UserTask2"))));
+  }
+
+  @Test
+  void processInstanceMigrator_should_set_variables_when_migrating_to_higher_minor_version() {
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            TestHelper.createMinorMigrationInstructions(
+                1,
+                5,
+                0,
+                List.of(new MigrationInstructionImpl("UserTask1", "UserTask2")),
+                Map.of("newVar", "newValue"))));
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(runtimeService().getVariables(processInstance1.getId()))
+        .containsEntry("newVar", "newValue");
+    assertThat(runtimeService().getVariables(processInstance2.getId()))
+        .containsEntry("newVar", "newValue");
+  }
+
+  @Test
+  void processInstanceMigrator_should_set_merged_variables_from_multiple_minor_migration_steps() {
+    newestProcessDefinitionAfterRedeployment =
+        TestHelper.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
+
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            TestHelper.createMinorMigrationInstructions(
+                1,
+                3,
+                0,
+                List.of(new MigrationInstructionImpl("UserTask1", "UserTask3")),
+                Map.of("firstStepVar", "firstValue"))));
+    migrationInstructionsDefaultImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            TestHelper.createMinorMigrationInstructions(
+                1,
+                5,
+                3,
+                List.of(new MigrationInstructionImpl("UserTask3", "UserTask2")),
+                Map.of("secondStepVar", "secondValue"))));
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(runtimeService().getVariables(processInstance1.getId()))
+        .containsEntry("firstStepVar", "firstValue")
+        .containsEntry("secondStepVar", "secondValue");
+    assertThat(runtimeService().getVariables(processInstance2.getId()))
+        .containsEntry("firstStepVar", "firstValue")
+        .containsEntry("secondStepVar", "secondValue");
   }
 
   @Test

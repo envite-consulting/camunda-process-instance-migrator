@@ -1,6 +1,7 @@
 package de.envite.bpm.camunda.migrator.instructions;
 
 import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -20,4 +21,5 @@ public class MinorMigrationInstructions {
   private final int targetMinorVersion;
   @NonNull private final List<MigrationInstruction> migrationInstructions;
   private final int majorVersion;
+  private final Map<String, Object> variables;
 }

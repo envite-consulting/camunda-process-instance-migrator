@@ -1,5 +1,6 @@
 package de.envite.bpm.camunda.migrator.migration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -7,14 +8,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.envite.bpm.camunda.migrator.integration.TestHelper;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RuntimeService;
+import org.camunda.bpm.engine.impl.migration.MigrationPlanImpl;
 import org.camunda.bpm.engine.migration.MigrationPlan;
 import org.camunda.bpm.engine.migration.MigrationPlanExecutionBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -24,6 +30,7 @@ class PerformMigrationDefaultImplTest {
   @Mock private ProcessEngine processEngine;
   @Mock private RuntimeService runtimeService;
   @Mock private MigrationPlanExecutionBuilder executionBuilder;
+  @Captor private ArgumentCaptor<MigrationPlan> migrationPlanCaptor;
 
   private PerformMigrationDefaultImpl performMigration;
 
@@ -104,5 +111,21 @@ class PerformMigrationDefaultImplTest {
     verify(executionBuilder).skipIoMappings();
     verify(executionBuilder, never()).execute();
     verify(executionBuilder).executeAsync();
+  }
+
+  @Test
+  void should_pass_variables_to_camunda_migration_plan() {
+    CustomMigrationPlan plan =
+        TestHelper.createCustomMigrationPlan(
+            "source-def-id",
+            "target-def-id",
+            List.of(TestHelper.createCustomMigrationInstruction("activityA", "activityB", false)),
+            new HashMap<>(Map.of("myVar", "myValue")));
+
+    performMigration.forPlanAndProcessInstanceId(plan, PROCESS_INSTANCE_ID, false, false, false);
+
+    verify(runtimeService).newMigration(migrationPlanCaptor.capture());
+    assertThat(((MigrationPlanImpl) migrationPlanCaptor.getValue()).getVariables())
+        .containsEntry("myVar", "myValue");
   }
 }

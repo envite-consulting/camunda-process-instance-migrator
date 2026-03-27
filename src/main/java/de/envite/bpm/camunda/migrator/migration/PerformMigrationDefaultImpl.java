@@ -1,5 +1,6 @@
 package de.envite.bpm.camunda.migrator.migration;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.engine.ProcessEngine;
@@ -7,6 +8,8 @@ import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.camunda.bpm.engine.impl.migration.MigrationPlanImpl;
 import org.camunda.bpm.engine.migration.MigrationPlan;
 import org.camunda.bpm.engine.migration.MigrationPlanExecutionBuilder;
+import org.camunda.bpm.engine.variable.VariableMap;
+import org.camunda.bpm.engine.variable.Variables;
 
 @RequiredArgsConstructor
 public class PerformMigrationDefaultImpl implements PerformMigration {
@@ -46,6 +49,7 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
     MigrationPlanImpl migrationPlan =
         new MigrationPlanImpl(
             plan.getSourceProcessDefinitionId(), plan.getTargetProcessDefinitionId());
+    migrationPlan.setVariables(mapToCamunda7VariablesMap(plan.getVariables()));
     migrationPlan.setInstructions(
         plan.getInstructions().stream()
             .map(
@@ -59,5 +63,15 @@ public class PerformMigrationDefaultImpl implements PerformMigration {
                 })
             .collect(Collectors.toList()));
     return migrationPlan;
+  }
+
+  private VariableMap mapToCamunda7VariablesMap(Map<String, Object> variables) {
+    VariableMap variablesMap = Variables.createVariables();
+    if (variables != null) {
+      for (Map.Entry<String, Object> variableEntry : variables.entrySet()) {
+        variablesMap.put(variableEntry.getKey(), variableEntry.getValue());
+      }
+    }
+    return variablesMap;
   }
 }

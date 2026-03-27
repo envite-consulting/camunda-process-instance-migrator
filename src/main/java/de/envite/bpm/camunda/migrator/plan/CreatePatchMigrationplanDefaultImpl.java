@@ -3,6 +3,7 @@ package de.envite.bpm.camunda.migrator.plan;
 import de.envite.bpm.camunda.migrator.instances.VersionedProcessInstance;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationPlan;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.engine.ProcessEngine;
@@ -29,6 +30,7 @@ public class CreatePatchMigrationplanDefaultImpl implements CreatePatchMigration
     return CustomMigrationPlan.builder()
         .sourceProcessDefinitionId(migrationPlan.getSourceProcessDefinitionId())
         .targetProcessDefinitionId(migrationPlan.getTargetProcessDefinitionId())
+        .variables(new HashMap<>())
         .instructions(
             migrationPlan.getInstructions().stream()
                 .map(
