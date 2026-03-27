@@ -6,6 +6,7 @@ import de.envite.bpm.camunda.migrator.instructions.MinorMigrationInstructions;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationPlan;
 import java.util.List;
+import java.util.Map;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
@@ -110,6 +111,20 @@ public class TestHelper {
         majorVersion, sourceMinorVersion, targetMinorVersion, List.of());
   }
 
+  public static MinorMigrationInstructions createMinorMigrationInstructions(
+      int majorVersion,
+      int sourceMinorVersion,
+      int targetMinorVersion,
+      Map<String, Object> variables) {
+    return MinorMigrationInstructions.builder()
+        .majorVersion(majorVersion)
+        .sourceMinorVersion(sourceMinorVersion)
+        .targetMinorVersion(targetMinorVersion)
+        .migrationInstructions(List.of())
+        .variables(variables)
+        .build();
+  }
+
   public static CustomMigrationInstruction createCustomMigrationInstruction(
       String sourceActivityId, String targetActivityId, boolean updateEventTrigger) {
     return CustomMigrationInstruction.builder()
@@ -127,6 +142,19 @@ public class TestHelper {
         .sourceProcessDefinitionId(sourceDefinitionId)
         .targetProcessDefinitionId(targetDefinitionId)
         .instructions(instructions)
+        .build();
+  }
+
+  public static CustomMigrationPlan createCustomMigrationPlan(
+      String sourceDefinitionId,
+      String targetDefinitionId,
+      List<CustomMigrationInstruction> instructions,
+      Map<String, Object> variables) {
+    return CustomMigrationPlan.builder()
+        .sourceProcessDefinitionId(sourceDefinitionId)
+        .targetProcessDefinitionId(targetDefinitionId)
+        .instructions(instructions)
+        .variables(variables)
         .build();
   }
 }

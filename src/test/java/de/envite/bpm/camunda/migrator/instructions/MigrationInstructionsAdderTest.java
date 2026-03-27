@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.envite.bpm.camunda.migrator.integration.TestHelper;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationInstruction;
 import de.envite.bpm.camunda.migrator.migration.CustomMigrationPlan;
 import java.util.ArrayList;
@@ -136,12 +137,8 @@ class MigrationInstructionsAdderTest {
   @Test
   void addVariables_should_put_variables_into_plan() {
     CustomMigrationPlan plan =
-        CustomMigrationPlan.builder()
-            .sourceProcessDefinitionId("source")
-            .targetProcessDefinitionId("target")
-            .instructions(new ArrayList<>())
-            .variables(new HashMap<>())
-            .build();
+        TestHelper.createCustomMigrationPlan(
+            "source", "target", new ArrayList<>(), new HashMap<>());
 
     MigrationInstructionsAdder.addVariables(plan, Map.of("a", "1", "b", "2"));
 
@@ -153,12 +150,8 @@ class MigrationInstructionsAdderTest {
     Map<String, Object> existingVariables = new HashMap<>();
     existingVariables.put("old", "x");
     CustomMigrationPlan plan =
-        CustomMigrationPlan.builder()
-            .sourceProcessDefinitionId("source")
-            .targetProcessDefinitionId("target")
-            .instructions(new ArrayList<>())
-            .variables(existingVariables)
-            .build();
+        TestHelper.createCustomMigrationPlan(
+            "source", "target", new ArrayList<>(), existingVariables);
 
     MigrationInstructionsAdder.addVariables(plan, Map.of("new", "y"));
 

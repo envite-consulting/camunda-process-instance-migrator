@@ -131,13 +131,7 @@ class MigrationInstructionCombinerTest {
   @Test
   void combineVariables_should_return_variables_from_single_instruction() {
     MinorMigrationInstructions instructions =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .variables(Map.of("key", "value"))
-            .build();
+        TestHelper.createMinorMigrationInstructions(MAJOR_VERSION, 1, 2, Map.of("key", "value"));
 
     Map<String, Object> result =
         MigrationInstructionCombiner.combineVariables(List.of(instructions));
@@ -148,22 +142,10 @@ class MigrationInstructionCombinerTest {
   @Test
   void combineVariables_should_merge_variables_from_multiple_instructions() {
     MinorMigrationInstructions instructions1To2 =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .variables(Map.of("a", "1"))
-            .build();
+        TestHelper.createMinorMigrationInstructions(MAJOR_VERSION, 1, 2, Map.of("a", "1"));
 
     MinorMigrationInstructions instructions2To3 =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(2)
-            .targetMinorVersion(3)
-            .migrationInstructions(List.of())
-            .variables(Map.of("b", "2"))
-            .build();
+        TestHelper.createMinorMigrationInstructions(MAJOR_VERSION, 2, 3, Map.of("b", "2"));
 
     Map<String, Object> result =
         MigrationInstructionCombiner.combineVariables(
@@ -175,22 +157,10 @@ class MigrationInstructionCombinerTest {
   @Test
   void combineVariables_should_have_later_minor_version_win_on_key_conflict() {
     MinorMigrationInstructions instructions1To2 =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .variables(Map.of("key", "old"))
-            .build();
+        TestHelper.createMinorMigrationInstructions(MAJOR_VERSION, 1, 2, Map.of("key", "old"));
 
     MinorMigrationInstructions instructions2To3 =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(2)
-            .targetMinorVersion(3)
-            .migrationInstructions(List.of())
-            .variables(Map.of("key", "new"))
-            .build();
+        TestHelper.createMinorMigrationInstructions(MAJOR_VERSION, 2, 3, Map.of("key", "new"));
 
     Map<String, Object> result =
         MigrationInstructionCombiner.combineVariables(
@@ -202,21 +172,10 @@ class MigrationInstructionCombinerTest {
   @Test
   void combineVariables_should_skip_instructions_with_null_variables() {
     MinorMigrationInstructions withNullVariables =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(1)
-            .targetMinorVersion(2)
-            .migrationInstructions(List.of())
-            .build();
+        TestHelper.createMinorMigrationInstructions(MAJOR_VERSION, 1, 2);
 
     MinorMigrationInstructions withVariables =
-        MinorMigrationInstructions.builder()
-            .majorVersion(MAJOR_VERSION)
-            .sourceMinorVersion(2)
-            .targetMinorVersion(3)
-            .migrationInstructions(List.of())
-            .variables(Map.of("a", "1"))
-            .build();
+        TestHelper.createMinorMigrationInstructions(MAJOR_VERSION, 2, 3, Map.of("a", "1"));
 
     Map<String, Object> result =
         MigrationInstructionCombiner.combineVariables(

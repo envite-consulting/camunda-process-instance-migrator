@@ -116,14 +116,11 @@ class PerformMigrationDefaultImplTest {
   @Test
   void should_pass_variables_to_camunda_migration_plan() {
     CustomMigrationPlan plan =
-        CustomMigrationPlan.builder()
-            .sourceProcessDefinitionId("source-def-id")
-            .targetProcessDefinitionId("target-def-id")
-            .instructions(
-                List.of(
-                    TestHelper.createCustomMigrationInstruction("activityA", "activityB", false)))
-            .variables(new HashMap<>(Map.of("myVar", "myValue")))
-            .build();
+        TestHelper.createCustomMigrationPlan(
+            "source-def-id",
+            "target-def-id",
+            List.of(TestHelper.createCustomMigrationInstruction("activityA", "activityB", false)),
+            new HashMap<>(Map.of("myVar", "myValue")));
 
     performMigration.forPlanAndProcessInstanceId(plan, PROCESS_INSTANCE_ID, false, false, false);
 
