@@ -32,6 +32,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: master
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
 
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
