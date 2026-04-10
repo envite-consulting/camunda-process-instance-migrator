@@ -112,7 +112,7 @@ jobs:
 
       - name: Merge master back to develop and bump next -SNAPSHOT
         run: |
-          git fetch origin develop:develop
+          git fetch origin develop
           git checkout develop
           git merge --no-edit origin/master || { echo "::error title=Merge conflict::Manual resolution required."; exit 1; }
           mvn -B versions:set -DnewVersion="${{ steps.versions.outputs.next_snapshot_version }}" -DgenerateBackupPoms=false
