@@ -32,10 +32,8 @@ jobs:
         include:
           - camunda_variant: default
             maven_extra_args: ""
-            version_suffix: ""
           - camunda_variant: camunda-7.23
             maven_extra_args: "-P camunda-7.23"
-            version_suffix: "-camunda7.23"
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
