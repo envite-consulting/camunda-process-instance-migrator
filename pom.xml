@@ -252,6 +252,12 @@
 
 	<profiles>
 		<profile>
+      <id>camunda-7.23</id>
+      <properties>
+        <camunda.version>7.23.0</camunda.version>
+      </properties>
+    </profile>
+    <profile>
       <id>snapshot</id>
       <build>
         <plugins>
