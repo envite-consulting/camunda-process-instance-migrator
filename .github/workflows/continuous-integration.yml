@@ -103,6 +103,7 @@ jobs:
       - name: Test
         run: mvn -B verify -Dcheckstyle.skip ${{ matrix.maven_extra_args }}
       - name: Upload JaCoCo Report
+        if: matrix.camunda_variant == 'default'
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.camunda_variant }}
