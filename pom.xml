@@ -59,14 +59,12 @@
 			 <groupId>org.camunda.bpm</groupId>
 			 <artifactId>camunda-engine</artifactId>
 			 <version>${camunda.version}</version>
-			 <scope>provided</scope>
 		</dependency>
 
     <dependency>
 			 <groupId>org.operaton.bpm</groupId>
 			 <artifactId>operaton-engine</artifactId>
 			 <version>${operaton.version}</version>
-			 <scope>provided</scope>
 		</dependency>
 
     <dependency>
