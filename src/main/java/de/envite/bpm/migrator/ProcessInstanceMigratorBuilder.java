@@ -1,6 +1,7 @@
 package de.envite.bpm.migrator;
 
 import de.envite.bpm.migrator.instances.GetOlderProcessInstances;
+import de.envite.bpm.migrator.instances.impl.GetOlderProcessInstancesCIB7Impl;
 import de.envite.bpm.migrator.instances.impl.GetOlderProcessInstancesCamundaImpl;
 import de.envite.bpm.migrator.instances.impl.GetOlderProcessInstancesOperatonImpl;
 import de.envite.bpm.migrator.instructions.MigrationInstructions;
@@ -9,27 +10,33 @@ import de.envite.bpm.migrator.instructions.impl.MigrationInstructionsImpl;
 import de.envite.bpm.migrator.instructions.impl.MigrationPropertiesImpl;
 import de.envite.bpm.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.migrator.logging.MigratorLogger;
+import de.envite.bpm.migrator.logging.impl.GenerateAllInstancesLoggingDataCIB7Impl;
 import de.envite.bpm.migrator.logging.impl.GenerateAllInstancesLoggingDataCamundaImpl;
 import de.envite.bpm.migrator.logging.impl.GenerateAllInstancesLoggingDataOperatonImpl;
 import de.envite.bpm.migrator.logging.impl.MigratorLoggerImpl;
 import de.envite.bpm.migrator.migration.PerformMigration;
+import de.envite.bpm.migrator.migration.impl.PerformMigrationCIB7Impl;
 import de.envite.bpm.migrator.migration.impl.PerformMigrationCamundaImpl;
 import de.envite.bpm.migrator.migration.impl.PerformMigrationOperatonImpl;
 import de.envite.bpm.migrator.plan.CreatePatchMigrationPlan;
 import de.envite.bpm.migrator.plan.LoadNewestDeployedVersion;
+import de.envite.bpm.migrator.plan.impl.CreatePatchMigrationPlanCIB7Impl;
 import de.envite.bpm.migrator.plan.impl.CreatePatchMigrationPlanCamundaImpl;
 import de.envite.bpm.migrator.plan.impl.CreatePatchMigrationPlanOperatonImpl;
+import de.envite.bpm.migrator.plan.impl.LoadNewestDeployedVersionCIB7Impl;
 import de.envite.bpm.migrator.plan.impl.LoadNewestDeployedVersionCamundaImpl;
 import de.envite.bpm.migrator.plan.impl.LoadNewestDeployedVersionOperatonImpl;
 import de.envite.bpm.migrator.processmetadata.LoadProcessDefinitionKeys;
+import de.envite.bpm.migrator.processmetadata.impl.LoadProcessDefinitionKeysCIB7Impl;
 import de.envite.bpm.migrator.processmetadata.impl.LoadProcessDefinitionKeysCamundaImpl;
 import de.envite.bpm.migrator.processmetadata.impl.LoadProcessDefinitionKeysOperatonImpl;
 import lombok.NoArgsConstructor;
 
 /**
  * Builder for an instance of ProcessInstanceMigrator. Requires at least one call of {@link
- * #ofProcessEngine(org.camunda.bpm.engine.ProcessEngine processEngine) ofProcessEngine} or {@link
- * #ofProcessEngine(org.operaton.bpm.engine.ProcessEngine processEngine) ofProcessEngine}. Will
+ * #ofProcessEngine(org.camunda.bpm.engine.ProcessEngine processEngine) ofProcessEngine}, {@link
+ * #ofProcessEngine(org.operaton.bpm.engine.ProcessEngine processEngine) ofProcessEngine}, or {@link
+ * #ofProcessEngine(org.cibseven.bpm.engine.ProcessEngine processEngine) ofProcessEngine}. Will
  * create a set of basic configuration object if no further configuration is specified.
  */
 @NoArgsConstructor
@@ -91,6 +98,31 @@ public class ProcessInstanceMigratorBuilder {
     if (generateAllInstancesLoggingData == null) {
       this.generateAllInstancesLoggingData =
           new GenerateAllInstancesLoggingDataOperatonImpl(processEngine);
+    }
+    return this;
+  }
+
+  public ProcessInstanceMigratorBuilder ofProcessEngine(
+      org.cibseven.bpm.engine.ProcessEngine processEngine) {
+    initProcessEngineIndependentProperties();
+    if (getOlderProcessInstancesToSet == null) {
+      this.getOlderProcessInstancesToSet = new GetOlderProcessInstancesCIB7Impl(processEngine);
+    }
+    if (createPatchMigrationPlanToSet == null) {
+      this.createPatchMigrationPlanToSet = new CreatePatchMigrationPlanCIB7Impl(processEngine);
+    }
+    if (performMigration == null) {
+      this.performMigration = new PerformMigrationCIB7Impl(processEngine);
+    }
+    if (loadProcessDefinitionKeys == null) {
+      this.loadProcessDefinitionKeys = new LoadProcessDefinitionKeysCIB7Impl(processEngine);
+    }
+    if (loadNewestDeployedVersion == null) {
+      this.loadNewestDeployedVersion = new LoadNewestDeployedVersionCIB7Impl(processEngine);
+    }
+    if (generateAllInstancesLoggingData == null) {
+      this.generateAllInstancesLoggingData =
+          new GenerateAllInstancesLoggingDataCIB7Impl(processEngine);
     }
     return this;
   }

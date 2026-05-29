@@ -14,10 +14,6 @@ import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskSe
 
 import de.envite.bpm.migrator.ProcessInstanceMigrator;
 import de.envite.bpm.migrator.ProcessInstanceMigratorBuilder;
-import de.envite.bpm.migrator.instructions.impl.MigrationInstructionsImpl;
-import java.util.Collections;
-import java.util.List;
-import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,16 +22,16 @@ import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.operaton.bpm.engine.runtime.ProcessInstance;
 import org.operaton.bpm.engine.test.junit5.ProcessEngineExtension;
 
-class ProcessInstanceMigratorOperatonTest_CallActivity_Minor {
+class ProcessInstanceMigratorOperatonCallActivityTest {
 
   private static final String PARENT_PROCESS_MODEL_1_0_0 =
       "test-processmodels/call_activity_parent_process_1_0_0.bpmn";
-  private static final String PARENT_PROCESS_MODEL_1_1_0 =
-      "test-processmodels/call_activity_parent_process_1_1_0.bpmn";
+  private static final String PARENT_PROCESS_MODEL_1_0_1 =
+      "test-processmodels/call_activity_parent_process_1_0_1.bpmn";
   private static final String CHILD_PROCESS_MODEL_1_0_0 =
       "test-processmodels/call_activity_child_process_1_0_0.bpmn";
-  private static final String CHILD_PROCESS_MODEL_1_1_0 =
-      "test-processmodels/call_activity_child_process_1_1_0.bpmn";
+  private static final String CHILD_PROCESS_MODEL_1_0_1 =
+      "test-processmodels/call_activity_child_process_1_0_1.bpmn";
   private static final String PARENT_PROCESS_KEY = "CallActivityParentProcess";
   private static final String CHILD_PROCESS_KEY = "CallActivityChildProcess";
 
@@ -43,17 +39,13 @@ class ProcessInstanceMigratorOperatonTest_CallActivity_Minor {
   private static final ProcessEngineExtension extension =
       ProcessEngineExtension.builder().configurationResource("operaton.cfg.xml").build();
 
-  private final MigrationInstructionsImpl migrationInstructions = new MigrationInstructionsImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
-      new ProcessInstanceMigratorBuilder()
-          .ofProcessEngine(processEngine())
-          .withMigrationInstructions(migrationInstructions)
-          .build();
+      new ProcessInstanceMigratorBuilder().ofProcessEngine(processEngine()).build();
 
   private ProcessDefinition parentProcessDefinition_1_0_0;
-  private ProcessDefinition parentProcessDefinition_1_1_0;
+  private ProcessDefinition parentProcessDefinition_1_0_1;
   private ProcessDefinition childProcessDefinition_1_0_0;
-  private ProcessDefinition childProcessDefinition_1_1_0;
+  private ProcessDefinition childProcessDefinition_1_0_1;
   private ProcessInstance parentProcessInstance;
 
   @BeforeEach
@@ -73,58 +65,11 @@ class ProcessInstanceMigratorOperatonTest_CallActivity_Minor {
         .createDeploymentQuery()
         .list()
         .forEach(deployment -> repositoryService().deleteDeployment(deployment.getId(), true));
-
-    migrationInstructions.clearInstructions();
   }
 
   @Test
   void
-      processInstanceMigrator_should_not_migrate_child_process_to_higher_minor_version_if_no_migration_plan_was_provided() {
-    assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
-        .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_0.getId());
-    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
-        .numberOfTasksIs(1)
-        .allTasksHaveKey("ChildUserTask1");
-
-    childProcessDefinition_1_1_0 =
-        deployNewProcessModel(
-            CHILD_PROCESS_MODEL_1_1_0, "1.1.0", CHILD_PROCESS_KEY, repositoryService());
-
-    processInstanceMigrator.migrateProcessInstances(CHILD_PROCESS_KEY);
-
-    assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
-        .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_0.getId());
-    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
-        .numberOfTasksIs(1)
-        .allTasksHaveKey("ChildUserTask1");
-  }
-
-  @Test
-  void
-      processInstanceMigrator_should_migrate_child_process_to_higher_minor_version_with_migration_instructions() {
-    assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
-        .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_0.getId());
-    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
-        .numberOfTasksIs(1)
-        .allTasksHaveKey("ChildUserTask1");
-
-    childProcessDefinition_1_1_0 =
-        deployNewProcessModel(
-            CHILD_PROCESS_MODEL_1_1_0, "1.1.0", CHILD_PROCESS_KEY, repositoryService());
-
-    migrationInstructions.putInstructions(
-        CHILD_PROCESS_KEY,
-        Collections.singletonList(
-            TestHelperOperaton.createMinorMigrationInstructions(
-                1,
-                1,
-                0,
-                List.of(new MigrationInstructionImpl("ChildUserTask1", "ChildUserTask2")))));
-    processInstanceMigrator.migrateProcessInstances(CHILD_PROCESS_KEY);
-
+      processInstanceMigrator_should_migrate_parent_process_instance_at_call_activity_to_higher_patch() {
     assertThat(getRunningProcessInstances(PARENT_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
         .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_0_0.getId());
@@ -132,29 +77,20 @@ class ProcessInstanceMigratorOperatonTest_CallActivity_Minor {
 
     assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_1_0.getId());
+        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_0.getId());
     assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
         .numberOfTasksIs(1)
-        .allTasksHaveKey("ChildUserTask2");
-  }
+        .allTasksHaveKey("ChildUserTask1");
 
-  @Test
-  void
-      processInstanceMigrator_should_not_migrate_parent_process_to_higher_minor_version_if_no_migration_plan_was_provided() {
-    assertThat(getRunningProcessInstances(PARENT_PROCESS_KEY, runtimeService()))
-        .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_0_0.getId());
-    assertThat(parentProcessInstance).isWaitingAtExactly("CallActivity1");
-
-    parentProcessDefinition_1_1_0 =
+    parentProcessDefinition_1_0_1 =
         deployNewProcessModel(
-            PARENT_PROCESS_MODEL_1_1_0, "1.1.0", PARENT_PROCESS_KEY, repositoryService());
+            PARENT_PROCESS_MODEL_1_0_1, "1.0.1", PARENT_PROCESS_KEY, repositoryService());
 
     processInstanceMigrator.migrateProcessInstances(PARENT_PROCESS_KEY);
 
     assertThat(getRunningProcessInstances(PARENT_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_0_0.getId());
+        .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_0_1.getId());
     assertThat(parentProcessInstance).isWaitingAtExactly("CallActivity1");
 
     assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
@@ -166,8 +102,20 @@ class ProcessInstanceMigratorOperatonTest_CallActivity_Minor {
   }
 
   @Test
-  void
-      processInstanceMigrator_should_migrate_parent_process_to_higher_minor_version_with_migration_instructions() {
+  void processInstanceMigrator_should_migrate_called_process_instance_independently() {
+    assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(1)
+        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_0.getId());
+    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
+        .numberOfTasksIs(1)
+        .allTasksHaveKey("ChildUserTask1");
+
+    childProcessDefinition_1_0_1 =
+        deployNewProcessModel(
+            CHILD_PROCESS_MODEL_1_0_1, "1.0.1", CHILD_PROCESS_KEY, repositoryService());
+
+    processInstanceMigrator.migrateProcessInstances(CHILD_PROCESS_KEY);
+
     assertThat(getRunningProcessInstances(PARENT_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
         .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_0_0.getId());
@@ -175,32 +123,43 @@ class ProcessInstanceMigratorOperatonTest_CallActivity_Minor {
 
     assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_0.getId());
+        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_1.getId());
     assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
         .numberOfTasksIs(1)
         .allTasksHaveKey("ChildUserTask1");
+  }
 
-    parentProcessDefinition_1_1_0 =
+  @Test
+  void
+      processInstanceMigrator_should_migrate_parent_and_called_process_instances_independently_in_sequence() {
+    childProcessDefinition_1_0_1 =
         deployNewProcessModel(
-            PARENT_PROCESS_MODEL_1_1_0, "1.1.0", PARENT_PROCESS_KEY, repositoryService());
+            CHILD_PROCESS_MODEL_1_0_1, "1.0.1", CHILD_PROCESS_KEY, repositoryService());
+    parentProcessDefinition_1_0_1 =
+        deployNewProcessModel(
+            PARENT_PROCESS_MODEL_1_0_1, "1.0.1", PARENT_PROCESS_KEY, repositoryService());
 
-    migrationInstructions.putInstructions(
-        PARENT_PROCESS_KEY,
-        Collections.singletonList(
-            TestHelperOperaton.createMinorMigrationInstructions(
-                1, 1, 0, List.of(new MigrationInstructionImpl("CallActivity1", "CallActivity2")))));
     processInstanceMigrator.migrateProcessInstances(PARENT_PROCESS_KEY);
 
     assertThat(getRunningProcessInstances(PARENT_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
-        .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_1_0.getId());
-    assertThat(parentProcessInstance).isWaitingAtExactly("CallActivity2");
+        .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_0_1.getId());
+    assertThat(parentProcessInstance).isWaitingAtExactly("CallActivity1");
 
     assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
         .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_0.getId());
-    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
-        .numberOfTasksIs(1)
-        .allTasksHaveKey("ChildUserTask1");
+    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService())).numberOfTasksIs(1);
+
+    processInstanceMigrator.migrateProcessInstances(CHILD_PROCESS_KEY);
+
+    assertThat(getRunningProcessInstances(PARENT_PROCESS_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(1)
+        .allProcessInstancesHaveDefinitionId(parentProcessDefinition_1_0_1.getId());
+
+    assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(1)
+        .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_1.getId());
+    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService())).numberOfTasksIs(1);
   }
 }

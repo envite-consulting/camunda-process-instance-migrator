@@ -1,21 +1,20 @@
 package de.envite.bpm.migrator.integration;
 
-import static de.envite.bpm.migrator.integration.TestHelperOperaton.getCurrentTasks;
-import static de.envite.bpm.migrator.integration.TestHelperOperaton.getRunningProcessInstances;
-import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListAsserterOperaton.assertThat;
-import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterOperaton.assertThat;
+import static de.envite.bpm.migrator.integration.TestHelperCamunda.getCurrentTasks;
+import static de.envite.bpm.migrator.integration.TestHelperCamunda.getRunningProcessInstances;
+import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListAsserterCamunda.assertThat;
+import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterCamunda.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.task;
-import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.task;
+import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
 
 import de.envite.bpm.migrator.ProcessInstanceMigrator;
-import de.envite.bpm.migrator.ProcessInstanceMigratorBuilder;
 import de.envite.bpm.migrator.instructions.MinorMigrationInstructions;
 import de.envite.bpm.migrator.instructions.impl.MigrationInstructionsImpl;
 import de.envite.bpm.migrator.instructions.impl.MigrationPropertiesImpl;
@@ -24,16 +23,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
+import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.engine.runtime.Job;
+import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.engine.test.junit5.ProcessEngineExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.operaton.bpm.engine.repository.ProcessDefinition;
-import org.operaton.bpm.engine.runtime.Job;
-import org.operaton.bpm.engine.runtime.ProcessInstance;
-import org.operaton.bpm.engine.test.junit5.ProcessEngineExtension;
 
-class ProcessInstanceMigratorOperatonTest_Minor {
+class ProcessInstanceMigratorCamundaMinorTest {
 
   private static final String MIGRATEABLE_PROCESS_MODEL_PATH =
       "test-processmodels/migrateable_processmodel_1_0_0.bpmn";
@@ -51,13 +50,13 @@ class ProcessInstanceMigratorOperatonTest_Minor {
 
   @RegisterExtension
   private static final ProcessEngineExtension extension =
-      ProcessEngineExtension.builder().configurationResource("operaton.cfg.xml").build();
+      ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
 
   private final MigrationInstructionsImpl migrationInstructionsImpl =
       new MigrationInstructionsImpl();
   private final MigrationPropertiesImpl migrationPropertiesImpl = new MigrationPropertiesImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
-      new ProcessInstanceMigratorBuilder()
+      ProcessInstanceMigrator.builder()
           .ofProcessEngine(processEngine())
           .withMigrationInstructions(migrationInstructionsImpl)
           .withMigrationProperties(migrationPropertiesImpl)
@@ -71,7 +70,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   @BeforeEach
   void setUp() {
     initialProcessDefinition =
-        TestHelperOperaton.deployInitialProcessModelAndStartProcessInstances(
+        TestHelperCamunda.deployInitialProcessModelAndStartProcessInstances(
             MIGRATEABLE_PROCESS_MODEL_PATH,
             "1.0.0",
             PROCESS_DEFINITION_KEY,
@@ -105,7 +104,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   void
       processInstanceMigrator_should_not_migrate_to_higher_minor_version_if_no_migration_plan_was_provided() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -136,7 +135,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   void
       processInstanceMigrator_should_migrate_to_higher_minor_version_if_migration_plan_was_provided() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -171,7 +170,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   void
       processInstanceMigrator_should_not_migrate_if_migration_to_higher_minor_version_has_faulty_migration_instructions() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -206,7 +205,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   void
       processInstanceMigrator_should_migrate_to_higher_minor_by_adding_up_migration_instructions() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -243,7 +242,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   void
       processInstanceMigrator_should_migrate_to_higher_minor_and_patch_version_using_only_minor_migration_plan() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_AND_PATCHED_PROCESS_MODEL_PATH,
             "1.5.1",
             PROCESS_DEFINITION_KEY,
@@ -281,7 +280,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   void
       processInstanceMigrator_should_migrate_to_mapped_id_even_if_same_id_still_exists_in_target() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_WITH_THIRD_TASK_PROCESS_MODEL_PATH,
             "1.7.0",
             PROCESS_DEFINITION_KEY,
@@ -329,7 +328,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   void
       processInstanceMigrator_should_migrate_minor_with_custom_listeners_and_io_mappings_not_skipped() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -357,7 +356,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   @Test
   void processInstanceMigrator_should_migrate_minor_async() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -409,32 +408,32 @@ class ProcessInstanceMigratorOperatonTest_Minor {
 
   private List<MinorMigrationInstructions> generateMigrationInstructionsFor100To150() {
     return Collections.singletonList(
-        TestHelperOperaton.createMinorMigrationInstructions(
+        TestHelperCamunda.createMinorMigrationInstructions(
             1, 5, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTask2"))));
   }
 
   private List<MinorMigrationInstructions> generateFaultyMigrationInstructionsFor100To150() {
     return Collections.singletonList(
-        TestHelperOperaton.createMinorMigrationInstructions(
+        TestHelperCamunda.createMinorMigrationInstructions(
             1, 5, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTask6"))));
   }
 
   private List<MinorMigrationInstructions> generateMigrationInstructionFor100To130() {
     return Collections.singletonList(
-        TestHelperOperaton.createMinorMigrationInstructions(
+        TestHelperCamunda.createMinorMigrationInstructions(
             1, 3, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTask3"))));
   }
 
   private List<MinorMigrationInstructions> generateMigrationInstructionFor130To150() {
     return Collections.singletonList(
-        TestHelperOperaton.createMinorMigrationInstructions(
+        TestHelperCamunda.createMinorMigrationInstructions(
             1, 5, 3, List.of(new MigrationInstructionImpl("UserTask3", "UserTask2"))));
   }
 
   @Test
   void processInstanceMigrator_should_set_variables_when_migrating_to_higher_minor_version() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -443,7 +442,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
     migrationInstructionsImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
-            TestHelperOperaton.createMinorMigrationInstructions(
+            TestHelperCamunda.createMinorMigrationInstructions(
                 1,
                 5,
                 0,
@@ -464,7 +463,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
   @Test
   void processInstanceMigrator_should_set_merged_variables_from_multiple_minor_migration_steps() {
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_INCREASED_PROCESS_MODEL_PATH,
             "1.5.0",
             PROCESS_DEFINITION_KEY,
@@ -473,7 +472,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
     migrationInstructionsImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
-            TestHelperOperaton.createMinorMigrationInstructions(
+            TestHelperCamunda.createMinorMigrationInstructions(
                 1,
                 3,
                 0,
@@ -482,7 +481,7 @@ class ProcessInstanceMigratorOperatonTest_Minor {
     migrationInstructionsImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
-            TestHelperOperaton.createMinorMigrationInstructions(
+            TestHelperCamunda.createMinorMigrationInstructions(
                 1,
                 5,
                 3,
@@ -504,11 +503,11 @@ class ProcessInstanceMigratorOperatonTest_Minor {
 
   @Test
   void processInstanceMigrator_should_migrate_all_process_instances_to_latest_minor() {
-    TestHelperOperaton.deployNewProcessModel(
+    TestHelperCamunda.deployNewProcessModel(
         MINOR_1_1_0_PROCESS_MODEL_PATH, "1.1.0", PROCESS_DEFINITION_KEY, repositoryService());
 
     newestProcessDefinitionAfterRedeployment =
-        TestHelperOperaton.deployNewProcessModel(
+        TestHelperCamunda.deployNewProcessModel(
             MINOR_1_2_0_PROCESS_MODEL_PATH, "1.2.0", PROCESS_DEFINITION_KEY, repositoryService());
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
@@ -526,12 +525,12 @@ class ProcessInstanceMigratorOperatonTest_Minor {
     migrationInstructionsImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
-            TestHelperOperaton.createMinorMigrationInstructions(
+            TestHelperCamunda.createMinorMigrationInstructions(
                 1, 1, 0, List.of(new MigrationInstructionImpl("UserTask1", "UserTaskA")))));
     migrationInstructionsImpl.putInstructions(
         PROCESS_DEFINITION_KEY,
         Collections.singletonList(
-            TestHelperOperaton.createMinorMigrationInstructions(
+            TestHelperCamunda.createMinorMigrationInstructions(
                 1, 2, 1, List.of(new MigrationInstructionImpl("ReceiveTask1", "ReceiveTaskB")))));
 
     processInstanceMigrator.migrateInstancesOfAllProcesses();
