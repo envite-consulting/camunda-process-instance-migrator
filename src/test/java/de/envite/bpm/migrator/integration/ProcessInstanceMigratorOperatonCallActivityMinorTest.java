@@ -1,31 +1,32 @@
 package de.envite.bpm.migrator.integration;
 
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.deployNewProcessModel;
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.getCurrentTasks;
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.getRunningProcessInstances;
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.startProcessInstance;
-import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListAsserterCamunda.assertThat;
-import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterCamunda.assertThat;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
+import static de.envite.bpm.migrator.integration.TestHelperOperaton.deployNewProcessModel;
+import static de.envite.bpm.migrator.integration.TestHelperOperaton.getCurrentTasks;
+import static de.envite.bpm.migrator.integration.TestHelperOperaton.getRunningProcessInstances;
+import static de.envite.bpm.migrator.integration.TestHelperOperaton.startProcessInstance;
+import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListAsserterOperaton.assertThat;
+import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterOperaton.assertThat;
+import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
+import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
+import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
+import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
+import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
 
 import de.envite.bpm.migrator.ProcessInstanceMigrator;
+import de.envite.bpm.migrator.ProcessInstanceMigratorBuilder;
 import de.envite.bpm.migrator.instructions.impl.MigrationInstructionsImpl;
 import java.util.Collections;
 import java.util.List;
 import org.camunda.bpm.engine.impl.migration.MigrationInstructionImpl;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
-import org.camunda.bpm.engine.test.junit5.ProcessEngineExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.engine.runtime.ProcessInstance;
+import org.operaton.bpm.engine.test.junit5.ProcessEngineExtension;
 
-class ProcessInstanceMigratorCamundaTest_CallActivity_Minor {
+class ProcessInstanceMigratorOperatonCallActivityMinorTest {
 
   private static final String PARENT_PROCESS_MODEL_1_0_0 =
       "test-processmodels/call_activity_parent_process_1_0_0.bpmn";
@@ -40,11 +41,11 @@ class ProcessInstanceMigratorCamundaTest_CallActivity_Minor {
 
   @RegisterExtension
   private static final ProcessEngineExtension extension =
-      ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
+      ProcessEngineExtension.builder().configurationResource("operaton.cfg.xml").build();
 
   private final MigrationInstructionsImpl migrationInstructions = new MigrationInstructionsImpl();
   private final ProcessInstanceMigrator processInstanceMigrator =
-      ProcessInstanceMigrator.builder()
+      new ProcessInstanceMigratorBuilder()
           .ofProcessEngine(processEngine())
           .withMigrationInstructions(migrationInstructions)
           .build();
@@ -117,7 +118,7 @@ class ProcessInstanceMigratorCamundaTest_CallActivity_Minor {
     migrationInstructions.putInstructions(
         CHILD_PROCESS_KEY,
         Collections.singletonList(
-            TestHelperCamunda.createMinorMigrationInstructions(
+            TestHelperOperaton.createMinorMigrationInstructions(
                 1,
                 1,
                 0,
@@ -186,7 +187,7 @@ class ProcessInstanceMigratorCamundaTest_CallActivity_Minor {
     migrationInstructions.putInstructions(
         PARENT_PROCESS_KEY,
         Collections.singletonList(
-            TestHelperCamunda.createMinorMigrationInstructions(
+            TestHelperOperaton.createMinorMigrationInstructions(
                 1, 1, 0, List.of(new MigrationInstructionImpl("CallActivity1", "CallActivity2")))));
     processInstanceMigrator.migrateProcessInstances(PARENT_PROCESS_KEY);
 

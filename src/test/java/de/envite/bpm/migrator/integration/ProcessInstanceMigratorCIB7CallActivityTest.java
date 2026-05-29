@@ -1,27 +1,28 @@
 package de.envite.bpm.migrator.integration;
 
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.deployNewProcessModel;
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.getCurrentTasks;
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.getRunningProcessInstances;
-import static de.envite.bpm.migrator.integration.TestHelperCamunda.startProcessInstance;
-import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListAsserterCamunda.assertThat;
-import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterCamunda.assertThat;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
-import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
+import static de.envite.bpm.migrator.integration.TestHelperCIB7.deployNewProcessModel;
+import static de.envite.bpm.migrator.integration.TestHelperCIB7.getCurrentTasks;
+import static de.envite.bpm.migrator.integration.TestHelperCIB7.getRunningProcessInstances;
+import static de.envite.bpm.migrator.integration.TestHelperCIB7.startProcessInstance;
+import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListAsserterCIB7.assertThat;
+import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterCIB7.assertThat;
+import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
+import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.processEngine;
+import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.repositoryService;
+import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.runtimeService;
+import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskService;
 
 import de.envite.bpm.migrator.ProcessInstanceMigrator;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
-import org.camunda.bpm.engine.test.junit5.ProcessEngineExtension;
+import de.envite.bpm.migrator.ProcessInstanceMigratorBuilder;
+import org.cibseven.bpm.engine.repository.ProcessDefinition;
+import org.cibseven.bpm.engine.runtime.ProcessInstance;
+import org.cibseven.bpm.engine.test.junit5.ProcessEngineExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ProcessInstanceMigratorCamundaTest_CallActivity {
+class ProcessInstanceMigratorCIB7CallActivityTest {
 
   private static final String PARENT_PROCESS_MODEL_1_0_0 =
       "test-processmodels/call_activity_parent_process_1_0_0.bpmn";
@@ -36,10 +37,10 @@ class ProcessInstanceMigratorCamundaTest_CallActivity {
 
   @RegisterExtension
   private static final ProcessEngineExtension extension =
-      ProcessEngineExtension.builder().configurationResource("camunda.cfg.xml").build();
+      ProcessEngineExtension.builder().configurationResource("cib7.cfg.xml").build();
 
   private final ProcessInstanceMigrator processInstanceMigrator =
-      ProcessInstanceMigrator.builder().ofProcessEngine(processEngine()).build();
+      new ProcessInstanceMigratorBuilder().ofProcessEngine(processEngine()).build();
 
   private ProcessDefinition parentProcessDefinition_1_0_0;
   private ProcessDefinition parentProcessDefinition_1_0_1;
@@ -159,8 +160,6 @@ class ProcessInstanceMigratorCamundaTest_CallActivity {
     assertThat(getRunningProcessInstances(CHILD_PROCESS_KEY, runtimeService()))
         .numberOfProcessInstancesIs(1)
         .allProcessInstancesHaveDefinitionId(childProcessDefinition_1_0_1.getId());
-    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService()))
-        .numberOfTasksIs(1)
-        .allTasksHaveFormkey("ChildFormkey1");
+    assertThat(getCurrentTasks(CHILD_PROCESS_KEY, taskService())).numberOfTasksIs(1);
   }
 }

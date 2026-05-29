@@ -45,6 +45,7 @@
 	<properties>
 		 <camunda.version>7.24.0</camunda.version>
      <operaton.version>2.1.1</operaton.version>
+     <cibseven.version>2.1.0</cibseven.version>
      <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
      <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
@@ -66,6 +67,26 @@
 			 <artifactId>operaton-engine</artifactId>
 			 <version>${operaton.version}</version>
 		</dependency>
+
+    <dependency>
+       <groupId>org.cibseven.bpm</groupId>
+       <artifactId>cibseven-engine</artifactId>
+       <version>${cibseven.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.cibseven.bpm</groupId>
+      <artifactId>cibseven-bpm-junit5</artifactId>
+      <version>${cibseven.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.cibseven.bpm</groupId>
+      <artifactId>cibseven-bpm-assert</artifactId>
+      <version>${cibseven.version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.operaton.bpm</groupId>
