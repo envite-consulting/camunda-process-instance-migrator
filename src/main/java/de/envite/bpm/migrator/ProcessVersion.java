@@ -1,16 +1,8 @@
 package de.envite.bpm.migrator;
 
 import java.util.Optional;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
-public class ProcessVersion {
-
-  private final int majorVersion;
-  private final int minorVersion;
-  private final int patchVersion;
+public record ProcessVersion(int majorVersion, int minorVersion, int patchVersion) {
 
   public static Optional<ProcessVersion> fromString(String versionString) {
     if (versionString == null || !versionString.matches("\\d+\\.\\d+\\.\\d+")) {
@@ -25,27 +17,27 @@ public class ProcessVersion {
   }
 
   public boolean isOlderVersionThan(ProcessVersion processVersionToCompare) {
-    return this.majorVersion < processVersionToCompare.getMajorVersion()
-        || (this.majorVersion == processVersionToCompare.getMajorVersion()
-            && this.minorVersion < processVersionToCompare.getMinorVersion())
-        || (this.majorVersion == processVersionToCompare.getMajorVersion()
-            && this.minorVersion == processVersionToCompare.getMinorVersion()
-            && this.patchVersion < processVersionToCompare.getPatchVersion());
+    return this.majorVersion < processVersionToCompare.majorVersion()
+        || (this.majorVersion == processVersionToCompare.majorVersion()
+            && this.minorVersion < processVersionToCompare.minorVersion())
+        || (this.majorVersion == processVersionToCompare.majorVersion()
+            && this.minorVersion == processVersionToCompare.minorVersion()
+            && this.patchVersion < processVersionToCompare.patchVersion());
   }
 
   public boolean isOlderPatchThan(ProcessVersion processVersionToCompare) {
-    return this.majorVersion == processVersionToCompare.getMajorVersion()
-        && this.minorVersion == processVersionToCompare.getMinorVersion()
-        && this.patchVersion < processVersionToCompare.getPatchVersion();
+    return this.majorVersion == processVersionToCompare.majorVersion()
+        && this.minorVersion == processVersionToCompare.minorVersion()
+        && this.patchVersion < processVersionToCompare.patchVersion();
   }
 
   public boolean isOlderMinorThan(ProcessVersion processVersionToCompare) {
-    return this.majorVersion == processVersionToCompare.getMajorVersion()
-        && this.minorVersion < processVersionToCompare.getMinorVersion();
+    return this.majorVersion == processVersionToCompare.majorVersion()
+        && this.minorVersion < processVersionToCompare.minorVersion();
   }
 
   public boolean isOlderMajorThan(ProcessVersion processVersionToCompare) {
-    return this.majorVersion < processVersionToCompare.getMajorVersion();
+    return this.majorVersion < processVersionToCompare.majorVersion();
   }
 
   public String toVersionTag() {

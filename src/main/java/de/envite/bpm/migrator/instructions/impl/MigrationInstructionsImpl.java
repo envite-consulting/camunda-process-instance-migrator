@@ -46,9 +46,9 @@ public class MigrationInstructionsImpl implements MigrationInstructions {
       return migrationInstructionMap.get(processDefinitionKey).stream()
           .filter(
               minorMigrationInstructions ->
-                  minorMigrationInstructions.getTargetMinorVersion() <= targetMinorVersion
-                      && minorMigrationInstructions.getSourceMinorVersion() >= sourceMinorVersion
-                      && minorMigrationInstructions.getMajorVersion() == majorVersion)
+                  minorMigrationInstructions.targetMinorVersion() <= targetMinorVersion
+                      && minorMigrationInstructions.sourceMinorVersion() >= sourceMinorVersion
+                      && minorMigrationInstructions.majorVersion() == majorVersion)
           .collect(Collectors.toList());
     } else {
       return Collections.emptyList();

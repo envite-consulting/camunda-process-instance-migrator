@@ -34,3 +34,7 @@ camunda-db.mv.db
 ### RELEASE ###
 pom.xml.releaseBackup
 release.properties
+/docs/agents/issue-tracker.md
+/docs/agents/domain.md
+/CLAUDE.md
+/.sdkmanrc

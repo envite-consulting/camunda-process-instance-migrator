@@ -69,10 +69,10 @@ public class ProcessInstanceMigrator {
         loadNewestDeployedVersion.forProcessDefinitionKey(processDefinitionKey);
     if (newestProcessDefinition.isEmpty()) {
       migratorLogger.logNoProcessInstancesDeployedWithKey(processDefinitionKey);
-    } else if (newestProcessDefinition.get().getProcessVersion().isEmpty()) {
+    } else if (newestProcessDefinition.get().processVersion().isEmpty()) {
       migratorLogger.logNewestDefinitionDoesNotHaveVersionTag(processDefinitionKey);
     } else {
-      ProcessVersion newestProcessVersion = newestProcessDefinition.get().getProcessVersion().get();
+      ProcessVersion newestProcessVersion = newestProcessDefinition.get().processVersion().get();
       migratorLogger.logNewestVersionInfo(
           processDefinitionKey, newestProcessVersion.toVersionTag());
 
@@ -82,11 +82,11 @@ public class ProcessInstanceMigrator {
 
       for (VersionedProcessInstance processInstance : olderProcessInstances) {
         CustomMigrationPlan migrationPlan = null;
-        if (processInstance.getProcessVersion().isOlderPatchThan(newestProcessVersion)) {
+        if (processInstance.processVersion().isOlderPatchThan(newestProcessVersion)) {
           migrationPlan =
               createPatchMigrationPlan.migrationPlanByMappingEqualActivityIDs(
                   newestProcessDefinition.get(), processInstance);
-        } else if (processInstance.getProcessVersion().isOlderMinorThan(newestProcessVersion)) {
+        } else if (processInstance.processVersion().isOlderMinorThan(newestProcessVersion)) {
           migrationPlan =
               createPatchMigrationPlan.migrationPlanByMappingEqualActivityIDs(
                   newestProcessDefinition.get(), processInstance);
@@ -94,9 +94,9 @@ public class ProcessInstanceMigrator {
           List<MinorMigrationInstructions> applicableMinorMigrationInstructions =
               migrationInstructions.getApplicableMinorMigrationInstructions(
                   processDefinitionKey,
-                  processInstance.getProcessVersion().getMinorVersion(),
-                  newestProcessVersion.getMinorVersion(),
-                  newestProcessVersion.getMajorVersion());
+                  processInstance.processVersion().minorVersion(),
+                  newestProcessVersion.minorVersion(),
+                  newestProcessVersion.majorVersion());
 
           List<CustomMigrationInstruction> executableMigrationInstructions =
               MigrationInstructionCombiner.combineMigrationInstructions(
@@ -112,30 +112,30 @@ public class ProcessInstanceMigrator {
           try {
             performMigration.forPlanAndProcessInstanceId(
                 migrationPlan,
-                processInstance.getProcessInstanceId(),
+                processInstance.processInstanceId(),
                 migrationProperties.skipCustomListeners(processDefinitionKey),
                 migrationProperties.skipIoMappings(processDefinitionKey),
                 migrationProperties.executeAsync(processDefinitionKey));
             migratorLogger.logMigrationSuccessful(
-                processInstance.getProcessInstanceId(), processInstance.getBusinessKey(),
-                processInstance.getProcessVersion().toVersionTag(),
+                processInstance.processInstanceId(), processInstance.businessKey(),
+                processInstance.processVersion().toVersionTag(),
                     newestProcessVersion.toVersionTag());
 
           } catch (Exception e) {
             migratorLogger.logMigrationError(
-                processInstance.getProcessInstanceId(),
-                processInstance.getBusinessKey(),
-                processInstance.getProcessVersion().toVersionTag(),
+                processInstance.processInstanceId(),
+                processInstance.businessKey(),
+                processInstance.processVersion().toVersionTag(),
                 newestProcessVersion.toVersionTag(),
-                processInstance.getProcessDefinitionId(),
-                newestProcessDefinition.get().getProcessDefinitionId(),
+                processInstance.processDefinitionId(),
+                newestProcessDefinition.get().processDefinitionId(),
                 e);
           }
         } else {
           migratorLogger.logMigrationPlanGenerationError(
-              processInstance.getProcessInstanceId(),
-              processInstance.getBusinessKey(),
-              processInstance.getProcessVersion().toVersionTag(),
+              processInstance.processInstanceId(),
+              processInstance.businessKey(),
+              processInstance.processVersion().toVersionTag(),
               newestProcessVersion.toVersionTag());
         }
       }
