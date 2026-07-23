@@ -22,11 +22,11 @@ public class MigrationInstructionCombiner {
       List<MinorMigrationInstructions> applicableMinorMigrationInstructions) {
     List<CustomMigrationInstruction> instructionList = new ArrayList<>();
     applicableMinorMigrationInstructions.stream()
-        .sorted(Comparator.comparingInt(MinorMigrationInstructions::getSourceMinorVersion))
+        .sorted(Comparator.comparingInt(MinorMigrationInstructions::sourceMinorVersion))
         // check every applicable minor-migration
         .forEach(
             minorMigrationInstructions ->
-                minorMigrationInstructions.getMigrationInstructions().stream()
+                minorMigrationInstructions.migrationInstructions().stream()
                     // go through all instructions for every migration
                     .forEach(
                         migrationInstruction -> {
@@ -72,9 +72,9 @@ public class MigrationInstructionCombiner {
       List<MinorMigrationInstructions> applicableMinorMigrationInstructions) {
     Map<String, Object> combined = new HashMap<>();
     applicableMinorMigrationInstructions.stream()
-        .sorted(Comparator.comparingInt(MinorMigrationInstructions::getSourceMinorVersion))
-        .filter(m -> m.getVariables() != null)
-        .forEach(m -> combined.putAll(m.getVariables()));
+        .sorted(Comparator.comparingInt(MinorMigrationInstructions::sourceMinorVersion))
+        .filter(m -> m.variables() != null)
+        .forEach(m -> combined.putAll(m.variables()));
     return combined;
   }
 }

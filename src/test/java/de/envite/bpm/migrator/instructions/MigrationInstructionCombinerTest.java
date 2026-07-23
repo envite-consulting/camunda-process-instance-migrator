@@ -8,6 +8,7 @@ import de.envite.bpm.migrator.migration.CustomMigrationInstruction;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.camunda.bpm.engine.migration.MigrationInstruction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,13 +71,13 @@ class MigrationInstructionCombinerTest {
     assertThat(result)
         .anyMatch(
             migrationInstruction ->
-                migrationInstruction.getSourceActivityId() == ACTIVITY_1
-                    && migrationInstruction.getTargetActivityId() == ACTIVITY_5);
+                Objects.equals(migrationInstruction.getSourceActivityId(), ACTIVITY_1)
+                    && Objects.equals(migrationInstruction.getTargetActivityId(), ACTIVITY_5));
     assertThat(result)
         .anyMatch(
             migrationInstruction ->
-                migrationInstruction.getSourceActivityId() == ACTIVITY_3
-                    && migrationInstruction.getTargetActivityId() == ACTIVITY_6);
+                Objects.equals(migrationInstruction.getSourceActivityId(), ACTIVITY_3)
+                    && Objects.equals(migrationInstruction.getTargetActivityId(), ACTIVITY_6));
   }
 
   @Test
@@ -102,23 +103,23 @@ class MigrationInstructionCombinerTest {
     assertThat(result)
         .anyMatch(
             migrationInstruction ->
-                migrationInstruction.getSourceActivityId() == ACTIVITY_1
-                    && migrationInstruction.getTargetActivityId() == ACTIVITY_2);
+                Objects.equals(migrationInstruction.getSourceActivityId(), ACTIVITY_1)
+                    && Objects.equals(migrationInstruction.getTargetActivityId(), ACTIVITY_2));
     assertThat(result)
         .anyMatch(
             migrationInstruction ->
-                migrationInstruction.getSourceActivityId() == ACTIVITY_3
-                    && migrationInstruction.getTargetActivityId() == ACTIVITY_4);
+                Objects.equals(migrationInstruction.getSourceActivityId(), ACTIVITY_3)
+                    && Objects.equals(migrationInstruction.getTargetActivityId(), ACTIVITY_4));
     assertThat(result)
         .anyMatch(
             migrationInstruction ->
-                migrationInstruction.getSourceActivityId() == ACTIVITY_5
-                    && migrationInstruction.getTargetActivityId() == ACTIVITY_6);
+                Objects.equals(migrationInstruction.getSourceActivityId(), ACTIVITY_5)
+                    && Objects.equals(migrationInstruction.getTargetActivityId(), ACTIVITY_6));
     assertThat(result)
         .anyMatch(
             migrationInstruction ->
-                migrationInstruction.getSourceActivityId() == ACTIVITY_7
-                    && migrationInstruction.getTargetActivityId() == ACTIVITY_8);
+                Objects.equals(migrationInstruction.getSourceActivityId(), ACTIVITY_7)
+                    && Objects.equals(migrationInstruction.getTargetActivityId(), ACTIVITY_8));
   }
 
   @Test

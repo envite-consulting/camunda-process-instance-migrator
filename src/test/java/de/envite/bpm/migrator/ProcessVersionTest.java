@@ -12,9 +12,9 @@ class ProcessVersionTest {
   void fromString_should_parse_major_minor_and_patch_versions_from_string_correctly() {
     ProcessVersion processVersion = ProcessVersion.fromString("1.3.5").get();
 
-    assertThat(processVersion.getMajorVersion()).isEqualTo(1);
-    assertThat(processVersion.getMinorVersion()).isEqualTo(3);
-    assertThat(processVersion.getPatchVersion()).isEqualTo(5);
+    assertThat(processVersion.majorVersion()).isEqualTo(1);
+    assertThat(processVersion.minorVersion()).isEqualTo(3);
+    assertThat(processVersion.patchVersion()).isEqualTo(5);
   }
 
   @Test

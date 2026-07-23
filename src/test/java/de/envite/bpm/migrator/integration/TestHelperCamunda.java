@@ -140,26 +140,6 @@ public class TestHelperCamunda {
         .build();
   }
 
-  public static CustomMigrationInstruction createCustomMigrationInstruction(
-      String sourceActivityId, String targetActivityId, boolean updateEventTrigger) {
-    return CustomMigrationInstruction.builder()
-        .sourceActivityId(sourceActivityId)
-        .targetActivityId(targetActivityId)
-        .updateEventTrigger(updateEventTrigger)
-        .build();
-  }
-
-  public static CustomMigrationPlan createCustomMigrationPlan(
-      String sourceDefinitionId,
-      String targetDefinitionId,
-      List<CustomMigrationInstruction> instructions) {
-    return CustomMigrationPlan.builder()
-        .sourceProcessDefinitionId(sourceDefinitionId)
-        .targetProcessDefinitionId(targetDefinitionId)
-        .instructions(instructions)
-        .build();
-  }
-
   public static CustomMigrationPlan createCustomMigrationPlan(
       String sourceDefinitionId,
       String targetDefinitionId,

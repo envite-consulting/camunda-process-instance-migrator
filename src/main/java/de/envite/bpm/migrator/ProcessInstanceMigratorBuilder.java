@@ -1,35 +1,27 @@
 package de.envite.bpm.migrator;
 
+import de.envite.bpm.migrator.engine.EngineGateway;
+import de.envite.bpm.migrator.engine.impl.CIB7EngineGateway;
+import de.envite.bpm.migrator.engine.impl.CamundaEngineGateway;
+import de.envite.bpm.migrator.engine.impl.OperatonEngineGateway;
 import de.envite.bpm.migrator.instances.GetOlderProcessInstances;
-import de.envite.bpm.migrator.instances.impl.GetOlderProcessInstancesCIB7Impl;
-import de.envite.bpm.migrator.instances.impl.GetOlderProcessInstancesCamundaImpl;
-import de.envite.bpm.migrator.instances.impl.GetOlderProcessInstancesOperatonImpl;
+import de.envite.bpm.migrator.instances.impl.GetOlderProcessInstancesDefaultImpl;
 import de.envite.bpm.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.migrator.instructions.MigrationProperties;
 import de.envite.bpm.migrator.instructions.impl.MigrationInstructionsImpl;
 import de.envite.bpm.migrator.instructions.impl.MigrationPropertiesImpl;
 import de.envite.bpm.migrator.logging.GenerateAllInstancesLoggingData;
 import de.envite.bpm.migrator.logging.MigratorLogger;
-import de.envite.bpm.migrator.logging.impl.GenerateAllInstancesLoggingDataCIB7Impl;
-import de.envite.bpm.migrator.logging.impl.GenerateAllInstancesLoggingDataCamundaImpl;
-import de.envite.bpm.migrator.logging.impl.GenerateAllInstancesLoggingDataOperatonImpl;
+import de.envite.bpm.migrator.logging.impl.GenerateAllInstancesLoggingDataDefaultImpl;
 import de.envite.bpm.migrator.logging.impl.MigratorLoggerImpl;
 import de.envite.bpm.migrator.migration.PerformMigration;
-import de.envite.bpm.migrator.migration.impl.PerformMigrationCIB7Impl;
-import de.envite.bpm.migrator.migration.impl.PerformMigrationCamundaImpl;
-import de.envite.bpm.migrator.migration.impl.PerformMigrationOperatonImpl;
+import de.envite.bpm.migrator.migration.impl.PerformMigrationDefaultImpl;
 import de.envite.bpm.migrator.plan.CreatePatchMigrationPlan;
 import de.envite.bpm.migrator.plan.LoadNewestDeployedVersion;
-import de.envite.bpm.migrator.plan.impl.CreatePatchMigrationPlanCIB7Impl;
-import de.envite.bpm.migrator.plan.impl.CreatePatchMigrationPlanCamundaImpl;
-import de.envite.bpm.migrator.plan.impl.CreatePatchMigrationPlanOperatonImpl;
-import de.envite.bpm.migrator.plan.impl.LoadNewestDeployedVersionCIB7Impl;
-import de.envite.bpm.migrator.plan.impl.LoadNewestDeployedVersionCamundaImpl;
-import de.envite.bpm.migrator.plan.impl.LoadNewestDeployedVersionOperatonImpl;
+import de.envite.bpm.migrator.plan.impl.CreatePatchMigrationPlanDefaultImpl;
+import de.envite.bpm.migrator.plan.impl.LoadNewestDeployedVersionDefaultImpl;
 import de.envite.bpm.migrator.processmetadata.LoadProcessDefinitionKeys;
-import de.envite.bpm.migrator.processmetadata.impl.LoadProcessDefinitionKeysCIB7Impl;
-import de.envite.bpm.migrator.processmetadata.impl.LoadProcessDefinitionKeysCamundaImpl;
-import de.envite.bpm.migrator.processmetadata.impl.LoadProcessDefinitionKeysOperatonImpl;
+import de.envite.bpm.migrator.processmetadata.impl.LoadProcessDefinitionKeysDefaultImpl;
 import lombok.NoArgsConstructor;
 
 /**
@@ -55,76 +47,44 @@ public class ProcessInstanceMigratorBuilder {
   public ProcessInstanceMigratorBuilder ofProcessEngine(
       org.camunda.bpm.engine.ProcessEngine processEngine) {
     initProcessEngineIndependentProperties();
-    if (getOlderProcessInstancesToSet == null) {
-      this.getOlderProcessInstancesToSet = new GetOlderProcessInstancesCamundaImpl(processEngine);
-    }
-    if (createPatchMigrationPlanToSet == null) {
-      this.createPatchMigrationPlanToSet = new CreatePatchMigrationPlanCamundaImpl(processEngine);
-    }
-    if (performMigration == null) {
-      this.performMigration = new PerformMigrationCamundaImpl(processEngine);
-    }
-    if (loadProcessDefinitionKeys == null) {
-      this.loadProcessDefinitionKeys = new LoadProcessDefinitionKeysCamundaImpl(processEngine);
-    }
-    if (loadNewestDeployedVersion == null) {
-      this.loadNewestDeployedVersion = new LoadNewestDeployedVersionCamundaImpl(processEngine);
-    }
-    if (generateAllInstancesLoggingData == null) {
-      this.generateAllInstancesLoggingData =
-          new GenerateAllInstancesLoggingDataCamundaImpl(processEngine);
-    }
+    initEngineDependentProperties(new CamundaEngineGateway(processEngine));
     return this;
   }
 
   public ProcessInstanceMigratorBuilder ofProcessEngine(
       org.operaton.bpm.engine.ProcessEngine processEngine) {
     initProcessEngineIndependentProperties();
-    if (getOlderProcessInstancesToSet == null) {
-      this.getOlderProcessInstancesToSet = new GetOlderProcessInstancesOperatonImpl(processEngine);
-    }
-    if (createPatchMigrationPlanToSet == null) {
-      this.createPatchMigrationPlanToSet = new CreatePatchMigrationPlanOperatonImpl(processEngine);
-    }
-    if (performMigration == null) {
-      this.performMigration = new PerformMigrationOperatonImpl(processEngine);
-    }
-    if (loadProcessDefinitionKeys == null) {
-      this.loadProcessDefinitionKeys = new LoadProcessDefinitionKeysOperatonImpl(processEngine);
-    }
-    if (loadNewestDeployedVersion == null) {
-      this.loadNewestDeployedVersion = new LoadNewestDeployedVersionOperatonImpl(processEngine);
-    }
-    if (generateAllInstancesLoggingData == null) {
-      this.generateAllInstancesLoggingData =
-          new GenerateAllInstancesLoggingDataOperatonImpl(processEngine);
-    }
+    initEngineDependentProperties(new OperatonEngineGateway(processEngine));
     return this;
   }
 
   public ProcessInstanceMigratorBuilder ofProcessEngine(
       org.cibseven.bpm.engine.ProcessEngine processEngine) {
     initProcessEngineIndependentProperties();
+    initEngineDependentProperties(new CIB7EngineGateway(processEngine));
+    return this;
+  }
+
+  private void initEngineDependentProperties(EngineGateway engineGateway) {
     if (getOlderProcessInstancesToSet == null) {
-      this.getOlderProcessInstancesToSet = new GetOlderProcessInstancesCIB7Impl(processEngine);
+      this.getOlderProcessInstancesToSet = new GetOlderProcessInstancesDefaultImpl(engineGateway);
     }
     if (createPatchMigrationPlanToSet == null) {
-      this.createPatchMigrationPlanToSet = new CreatePatchMigrationPlanCIB7Impl(processEngine);
+      this.createPatchMigrationPlanToSet = new CreatePatchMigrationPlanDefaultImpl(engineGateway);
     }
     if (performMigration == null) {
-      this.performMigration = new PerformMigrationCIB7Impl(processEngine);
+      this.performMigration = new PerformMigrationDefaultImpl(engineGateway);
     }
     if (loadProcessDefinitionKeys == null) {
-      this.loadProcessDefinitionKeys = new LoadProcessDefinitionKeysCIB7Impl(processEngine);
+      this.loadProcessDefinitionKeys = new LoadProcessDefinitionKeysDefaultImpl(engineGateway);
     }
     if (loadNewestDeployedVersion == null) {
-      this.loadNewestDeployedVersion = new LoadNewestDeployedVersionCIB7Impl(processEngine);
+      this.loadNewestDeployedVersion = new LoadNewestDeployedVersionDefaultImpl(engineGateway);
     }
     if (generateAllInstancesLoggingData == null) {
       this.generateAllInstancesLoggingData =
-          new GenerateAllInstancesLoggingDataCIB7Impl(processEngine);
+          new GenerateAllInstancesLoggingDataDefaultImpl(engineGateway);
     }
-    return this;
   }
 
   private void initProcessEngineIndependentProperties() {
