@@ -40,7 +40,7 @@ jobs:
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         id: cache
@@ -87,7 +87,7 @@ jobs:
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         uses: actions/cache@v6
@@ -137,7 +137,7 @@ jobs:
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         uses: actions/cache@v6
@@ -197,7 +197,7 @@ jobs:
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache SonarCloud packages
         uses: actions/cache@v6
