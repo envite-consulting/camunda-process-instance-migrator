@@ -38,9 +38,9 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v7
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         id: cache
@@ -85,9 +85,9 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v7
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         uses: actions/cache@v6
@@ -135,9 +135,9 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v7
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         uses: actions/cache@v6
@@ -195,9 +195,9 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache SonarCloud packages
         uses: actions/cache@v6
