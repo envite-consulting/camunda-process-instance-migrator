@@ -1,17 +1,17 @@
 # Camunda Process Instance Migrator
 
-This tool will allow you to automatically or semi-automatically migrate all of your Camunda Process
+This tool will allow you to automatically or semi-automatically migrate all of your Camunda 7, Operaton and CIB seven Process
 Instances whenever you release a new version.
 
 ## Supported engines
 
-| Engine             | Tested version | `ofProcessEngine` overload              |
-|--------------------|----------------|-----------------------------------------|
-| Camunda Platform 7 | 7.24.0         | `org.camunda.bpm.engine.ProcessEngine`  |
-| Operaton           | 2.1.2          | `org.operaton.bpm.engine.ProcessEngine` |
-| CIB seven          | 2.2.0          | `org.cibseven.bpm.engine.ProcessEngine` |
+| Engine             | `ofProcessEngine` overload              |
+|--------------------|-----------------------------------------|
+| Camunda Platform 7 | `org.camunda.bpm.engine.ProcessEngine`  |
+| Operaton           | `org.operaton.bpm.engine.ProcessEngine` |
+| CIB seven          | `org.cibseven.bpm.engine.ProcessEngine` |
 
-## What does this library add on top of Camunda's migration API?
+## What does this library add on top of Camunda 7, Operaton und CIB seven migration API?
 
 Camunda 7 provides a low-level [Migration API](https://docs.camunda.org/manual/latest/user-guide/process-engine/process-instance-migration/)
 that requires you to manually construct a migration plan for a specific source and target process
@@ -46,7 +46,7 @@ This is for two reasons:
 
 ## How does it work?
 
-The migrator scans the Camunda engine for all deployed process definition keys, finds running
+The migrator scans the Camunda 7, Operaton and CIB seven engine for all deployed process definition keys, finds running
 instances on older versions, and attempts to migrate them to the newest deployed version.
 
 ```mermaid
@@ -112,7 +112,7 @@ for the latest version.
 
 ### Basic setup (patch-only migrations)
 
-Inject Camunda's `ProcessEngine` and build the migrator. No further configuration is required for
+Inject Camunda, Operaton and/or CIB seven `ProcessEngine` and build the migrator. No further configuration is required for
 patch-level migrations:
 
 ```java
@@ -251,14 +251,13 @@ builder:
 
 ## What limitations are there?
 
-The tool was developed against Camunda Platform 7 and its compatible forks (Operaton, CIB seven) —
-see [Supported engines](#supported-engines) for tested versions. It is not compatible with Camunda
-Platform 8.
+The tool was developed against Camunda 7 and its compatible forks (Operaton, CIB seven) —
+see [Supported engines](#supported-engines) for tested versions. It is not compatible with Camunda 8.
 
 Requires Java 17.
 
 There are also no restrictions to the specifiable migration instructions for minor migrations,
-unlike in the migration wizard of Camunda's EE Cockpit. So this migrator will not prevent you from
+unlike in the migration wizard of Camunda 7 EE Cockpit. So this migrator will not prevent you from
 trying to migrate activities to different types of activities (i.e. from wait-states to
 non-wait-states or from receive tasks to user tasks). This might, however, result in undefined states
 and has not been tested whatsoever. So handle with care!
