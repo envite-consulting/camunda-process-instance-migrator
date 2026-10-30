@@ -5,6 +5,7 @@ import de.envite.bpm.migrator.engine.ProcessDefinitionSnapshot;
 import de.envite.bpm.migrator.engine.ProcessInstanceSnapshot;
 import de.envite.bpm.migrator.migration.CustomMigrationInstruction;
 import de.envite.bpm.migrator.migration.CustomMigrationPlan;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,6 +138,7 @@ public class CamundaEngineGateway implements EngineGateway {
         .sourceProcessDefinitionId(migrationPlan.getSourceProcessDefinitionId())
         .targetProcessDefinitionId(migrationPlan.getTargetProcessDefinitionId())
         .variables(new HashMap<>())
+        .variablesToRemove(new ArrayList<>())
         .instructions(
             migrationPlan.getInstructions().stream()
                 .map(
@@ -176,6 +178,12 @@ public class CamundaEngineGateway implements EngineGateway {
       executionBuilder.executeAsync();
     } else {
       executionBuilder.execute();
+    }
+
+    if (plan.getVariablesToRemove() != null && !plan.getVariablesToRemove().isEmpty()) {
+      processEngine
+          .getRuntimeService()
+          .removeVariables(processInstanceId, plan.getVariablesToRemove());
     }
   }
 

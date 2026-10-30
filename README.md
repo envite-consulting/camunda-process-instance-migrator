@@ -196,6 +196,36 @@ There is no requirement for all intermediate versions to actually be deployed on
 environment. If a production environment jumps from `1.5.x` to `1.8.x` (skipping intermediate
 versions), instructions for `1.5→1.6`, `1.6→1.7`, and `1.7→1.8` are sufficient.
 
+#### Adding and removing variables
+
+A `MinorMigrationInstructions` entry can also add new process variables (as literal values) and
+remove variables that no longer apply, as part of the same minor migration step:
+
+```java
+MinorMigrationInstructions.builder()
+    .sourceMinorVersion(0)
+    .targetMinorVersion(2)
+    .majorVersion(1)
+    .migrationInstructions(Arrays.asList(
+        new MigrationInstructionImpl("UserTask1", "UserTask3"),
+        new MigrationInstructionImpl("UserTask2", "UserTask3")))
+    .variables(Map.of("newVariable", "literalValue"))
+    .variablesToRemove(List.of("obsoleteVariable"))
+    .build();
+```
+
+`variables` only accepts literal values — expressions are intentionally not supported, since
+evaluating an expression against a process instance's live variable state would require deciding
+exactly when during migration it runs (before, after, or interleaved with the actual migration),
+which the engine's migration transaction does not give you a safe window for. Renaming a variable
+is modeled as the combination of both: remove the old name via `variablesToRemove` and add the new
+name (with a value you supply) via `variables`. If you need to carry over a variable's existing
+value under a new name, read it yourself (e.g. via `RuntimeService.getVariable`) before building
+your instructions, rather than relying on an expression evaluated mid-migration.
+
+When multiple minor migration steps are chained, `variables` are merged (later steps win on key
+conflicts) and `variablesToRemove` are unioned across all steps.
+
 ### Migration properties
 
 You can configure the migration behavior per process definition key using `MigrationProperties`:
@@ -262,8 +292,11 @@ trying to migrate activities to different types of activities (i.e. from wait-st
 non-wait-states or from receive tasks to user tasks). This might, however, result in undefined states
 and has not been tested whatsoever. So handle with care!
 
-Operations that go beyond migration, like Process Instance Modifications or the setting of variables
-upon migration are also not implemented yet.
+Operations that go beyond migration, like Process Instance Modifications, are also not implemented
+yet. Adding and removing literal-valued variables during migration is supported (see "Adding and
+removing variables" above); evaluating expressions against variable values is not, and is not
+planned, since it would require defined semantics for exactly when an expression is evaluated
+relative to the migration transaction.
 
 ## What else do I need to know?
 
