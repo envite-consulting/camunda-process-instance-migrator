@@ -186,7 +186,7 @@
         </configuration>
       </plugin>
 
-      <!-- Camunda ships a scala-shaded feel-engine, Operaton an unshaded one. Both define the same
+      <!-- Camunda and CIB7 ship a scala-shaded feel-engine, Operaton an unshaded one. Both define the same
            org.camunda.feel classes with incompatible signatures, so Operaton tests run in their own
            execution without the shaded jar on the classpath. -->
       <plugin>
