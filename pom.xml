@@ -186,6 +186,42 @@
         </configuration>
       </plugin>
 
+      <!-- Camunda ships a scala-shaded feel-engine, Operaton an unshaded one. Both define the same
+           org.camunda.feel classes with incompatible signatures, so Operaton tests run in their own
+           execution without the shaded jar on the classpath. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>**/ProcessInstanceMigratorOperaton*Test.java</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>operaton-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/ProcessInstanceMigratorOperaton*Test.java</include>
+              </includes>
+              <classpathDependencyExcludes>
+                <classpathDependencyExclude>org.camunda.feel:feel-engine:jar:scala-shaded</classpathDependencyExclude>
+              </classpathDependencyExcludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
 			<!-- Optional: ensure the manifest contains artifact version information: -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
