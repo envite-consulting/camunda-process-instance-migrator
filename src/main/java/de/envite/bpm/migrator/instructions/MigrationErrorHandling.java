@@ -1,16 +1,16 @@
 package de.envite.bpm.migrator.instructions;
 
 /**
- * Controls how a failure to migrate a process instance (or to generate a migration plan for one)
- * is surfaced for a given process definition key.
+ * Controls how a failure to migrate a process instance (or to generate a migration plan for one) is
+ * surfaced for a given process definition key.
  */
 public enum MigrationErrorHandling {
 
   /**
    * Only log the failure (via {@code MigratorLogger#logMigrationError} or {@code
    * MigratorLogger#logMigrationPlanGenerationError}) and continue with the remaining process
-   * instances. Nothing is thrown. This matches the migrator's behavior prior to the introduction
-   * of this property.
+   * instances. Nothing is thrown. This matches the migrator's behavior prior to the introduction of
+   * this property.
    */
   LOG_ONLY,
 
@@ -22,8 +22,8 @@ public enum MigrationErrorHandling {
   FAIL_FAST,
 
   /**
-   * Attempt to migrate every process instance for the process definition key and, once done,
-   * throw a single {@code AggregatedMigrationException} listing all failures that occurred.
+   * Attempt to migrate every process instance for the process definition key and, once done, throw
+   * a single {@code AggregatedMigrationException} listing all failures that occurred.
    */
   COLLECT_AND_THROW
 }

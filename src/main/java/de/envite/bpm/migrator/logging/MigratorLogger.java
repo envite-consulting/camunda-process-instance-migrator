@@ -71,8 +71,8 @@ public interface MigratorLogger {
       String processInstanceId, String businessKey, String versionTagOld, String versionTagNew);
 
   /**
-   * Creates a log message indicating that migration failed for a process instance. Only called
-   * when the process definition key's {@code MigrationErrorHandling} is {@code LOG_ONLY}.
+   * Creates a log message indicating that migration failed for a process instance. Only called when
+   * the process definition key's {@code MigrationErrorHandling} is {@code LOG_ONLY}.
    *
    * @param processInstanceId the ID of the process instance for which migration failed.
    * @param businessKey the business key of the process instance for which migration failed.

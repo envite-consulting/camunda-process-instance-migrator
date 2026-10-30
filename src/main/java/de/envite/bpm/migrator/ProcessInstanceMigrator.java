@@ -87,7 +87,8 @@ public class ProcessInstanceMigrator {
           getOlderProcessInstances.getOlderProcessInstances(
               processDefinitionKey, newestProcessVersion);
 
-      MigrationErrorHandling errorHandling = migrationProperties.errorHandling(processDefinitionKey);
+      MigrationErrorHandling errorHandling =
+          migrationProperties.errorHandling(processDefinitionKey);
 
       for (VersionedProcessInstance processInstance : olderProcessInstances) {
         CustomMigrationPlan migrationPlan = null;

@@ -79,7 +79,10 @@ class ProcessInstanceMigratorTest {
 
   private VersionedProcessInstance olderInstance(String processInstanceId) {
     return new VersionedProcessInstance(
-        processInstanceId, "businessKey-" + processInstanceId, new ProcessVersion(1, 0, 0), "defOld");
+        processInstanceId,
+        "businessKey-" + processInstanceId,
+        new ProcessVersion(1, 0, 0),
+        "defOld");
   }
 
   private void givenNewestVersion() {
@@ -102,7 +105,8 @@ class ProcessInstanceMigratorTest {
         .thenReturn(MigrationErrorHandling.FAIL_FAST);
     doThrow(new RuntimeException("boom"))
         .when(performMigration)
-        .forPlanAndProcessInstanceId(any(), eq("instance1"), anyBoolean(), anyBoolean(), anyBoolean());
+        .forPlanAndProcessInstanceId(
+            any(), eq("instance1"), anyBoolean(), anyBoolean(), anyBoolean());
 
     assertThatThrownBy(() -> migrator.migrateProcessInstances(PROCESS_DEFINITION_KEY))
         .isInstanceOf(MigrationException.class);
@@ -112,7 +116,8 @@ class ProcessInstanceMigratorTest {
   }
 
   @Test
-  void migrateProcessInstances_shouldThrowImmediately_whenFailFastAndNoMigrationPlanCouldBeGenerated() {
+  void
+      migrateProcessInstances_shouldThrowImmediately_whenFailFastAndNoMigrationPlanCouldBeGenerated() {
     givenNewestVersion();
     VersionedProcessInstance instance1 = olderInstance("instance1");
     when(getOlderProcessInstances.getOlderProcessInstances(eq(PROCESS_DEFINITION_KEY), any()))
@@ -139,10 +144,12 @@ class ProcessInstanceMigratorTest {
         .thenReturn(MigrationErrorHandling.COLLECT_AND_THROW);
     doThrow(new RuntimeException("boom1"))
         .when(performMigration)
-        .forPlanAndProcessInstanceId(any(), eq("instance1"), anyBoolean(), anyBoolean(), anyBoolean());
+        .forPlanAndProcessInstanceId(
+            any(), eq("instance1"), anyBoolean(), anyBoolean(), anyBoolean());
     doThrow(new RuntimeException("boom2"))
         .when(performMigration)
-        .forPlanAndProcessInstanceId(any(), eq("instance2"), anyBoolean(), anyBoolean(), anyBoolean());
+        .forPlanAndProcessInstanceId(
+            any(), eq("instance2"), anyBoolean(), anyBoolean(), anyBoolean());
 
     assertThatThrownBy(() -> migrator.migrateProcessInstances(PROCESS_DEFINITION_KEY))
         .isInstanceOf(AggregatedMigrationException.class)
@@ -151,7 +158,8 @@ class ProcessInstanceMigratorTest {
               AggregatedMigrationException aggregated = (AggregatedMigrationException) e;
               assertThat(aggregated.getFailures()).hasSize(2);
               assertThat(aggregated.getFailures())
-                  .allSatisfy(failure -> assertThat(failure).isInstanceOf(MigrationException.class));
+                  .allSatisfy(
+                      failure -> assertThat(failure).isInstanceOf(MigrationException.class));
             });
 
     verify(performMigration, times(2))
@@ -172,7 +180,8 @@ class ProcessInstanceMigratorTest {
         .thenReturn(MigrationErrorHandling.LOG_ONLY);
     doThrow(new RuntimeException("boom"))
         .when(performMigration)
-        .forPlanAndProcessInstanceId(any(), eq("instance1"), anyBoolean(), anyBoolean(), anyBoolean());
+        .forPlanAndProcessInstanceId(
+            any(), eq("instance1"), anyBoolean(), anyBoolean(), anyBoolean());
 
     migrator.migrateProcessInstances(PROCESS_DEFINITION_KEY);
 

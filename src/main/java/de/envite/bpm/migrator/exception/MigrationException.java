@@ -1,6 +1,8 @@
 package de.envite.bpm.migrator.exception;
 
-/** Thrown when a process instance could not be migrated to the newest process definition version. */
+/**
+ * Thrown when a process instance could not be migrated to the newest process definition version.
+ */
 public class MigrationException extends RuntimeException {
 
   public MigrationException(
