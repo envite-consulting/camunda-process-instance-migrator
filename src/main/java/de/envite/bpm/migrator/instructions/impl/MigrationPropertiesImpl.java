@@ -1,5 +1,6 @@
 package de.envite.bpm.migrator.instructions.impl;
 
+import de.envite.bpm.migrator.instructions.MigrationErrorHandling;
 import de.envite.bpm.migrator.instructions.MigrationProperties;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,11 +11,13 @@ public class MigrationPropertiesImpl implements MigrationProperties {
   private final Map<String, Boolean> skipCustomListenersMap;
   private final Map<String, Boolean> skipIoMappingsMap;
   private final Map<String, Boolean> executeAsyncMap;
+  private final Map<String, MigrationErrorHandling> errorHandlingMap;
 
   public MigrationPropertiesImpl() {
     this.skipCustomListenersMap = new HashMap<>();
     this.skipIoMappingsMap = new HashMap<>();
     this.executeAsyncMap = new HashMap<>();
+    this.errorHandlingMap = new HashMap<>();
   }
 
   public MigrationPropertiesImpl putSkipCustomListeners(
@@ -35,6 +38,12 @@ public class MigrationPropertiesImpl implements MigrationProperties {
     return this;
   }
 
+  public MigrationPropertiesImpl putErrorHandling(
+      String processDefinitionKey, MigrationErrorHandling errorHandling) {
+    errorHandlingMap.put(processDefinitionKey, errorHandling);
+    return this;
+  }
+
   @Override
   public boolean skipCustomListeners(String processDefinitionKey) {
     return skipCustomListenersMap.getOrDefault(processDefinitionKey, true);
@@ -48,5 +57,10 @@ public class MigrationPropertiesImpl implements MigrationProperties {
   @Override
   public boolean executeAsync(String processDefinitionKey) {
     return executeAsyncMap.getOrDefault(processDefinitionKey, false);
+  }
+
+  @Override
+  public MigrationErrorHandling errorHandling(String processDefinitionKey) {
+    return errorHandlingMap.getOrDefault(processDefinitionKey, MigrationErrorHandling.FAIL_FAST);
   }
 }
