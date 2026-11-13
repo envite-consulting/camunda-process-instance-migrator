@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.camunda.bpm.engine.migration.MigrationInstruction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -186,5 +187,57 @@ class MigrationInstructionCombinerTest {
             Arrays.asList(withNullVariables, withVariables));
 
     assertThat(result).containsEntry("a", "1").hasSize(1);
+  }
+
+  @Test
+  void combineVariablesToRemove_should_return_empty_set_for_empty_list() {
+    Set<String> result = MigrationInstructionCombiner.combineVariablesToRemove(List.of());
+
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  void combineVariablesToRemove_should_return_names_from_single_instruction() {
+    MinorMigrationInstructions instructions =
+        TestHelperCamunda.createMinorMigrationInstructions(
+            MAJOR_VERSION, 1, 2, List.of(), Map.of(), List.of("obsoleteVar"));
+
+    Set<String> result =
+        MigrationInstructionCombiner.combineVariablesToRemove(List.of(instructions));
+
+    assertThat(result).containsExactly("obsoleteVar");
+  }
+
+  @Test
+  void combineVariablesToRemove_should_merge_names_from_multiple_instructions() {
+    MinorMigrationInstructions instructions1To2 =
+        TestHelperCamunda.createMinorMigrationInstructions(
+            MAJOR_VERSION, 1, 2, List.of(), Map.of(), List.of("a"));
+
+    MinorMigrationInstructions instructions2To3 =
+        TestHelperCamunda.createMinorMigrationInstructions(
+            MAJOR_VERSION, 2, 3, List.of(), Map.of(), List.of("b"));
+
+    Set<String> result =
+        MigrationInstructionCombiner.combineVariablesToRemove(
+            Arrays.asList(instructions1To2, instructions2To3));
+
+    assertThat(result).containsExactlyInAnyOrder("a", "b");
+  }
+
+  @Test
+  void combineVariablesToRemove_should_skip_instructions_with_null_variablesToRemove() {
+    MinorMigrationInstructions withNullVariablesToRemove =
+        TestHelperCamunda.createMinorMigrationInstructions(MAJOR_VERSION, 1, 2);
+
+    MinorMigrationInstructions withVariablesToRemove =
+        TestHelperCamunda.createMinorMigrationInstructions(
+            MAJOR_VERSION, 2, 3, List.of(), Map.of(), List.of("a"));
+
+    Set<String> result =
+        MigrationInstructionCombiner.combineVariablesToRemove(
+            Arrays.asList(withNullVariablesToRemove, withVariablesToRemove));
+
+    assertThat(result).containsExactly("a");
   }
 }

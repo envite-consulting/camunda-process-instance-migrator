@@ -5,6 +5,7 @@ import de.envite.bpm.migrator.migration.CustomMigrationPlan;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MigrationInstructionsAdder {
 
@@ -63,5 +64,18 @@ public class MigrationInstructionsAdder {
       CustomMigrationPlan migrationPlan, Map<String, Object> variables) {
     migrationPlan.getVariables().clear();
     migrationPlan.getVariables().putAll(variables);
+  }
+
+  /**
+   * Modifies a given instance of {@link CustomMigrationPlan} by setting the names of variables to
+   * be removed from the process instance as part of the migration.
+   *
+   * @param migrationPlan the plan to be modified
+   * @param variablesToRemove the names of the variables to be removed from the original plan.
+   */
+  public static void removeVariables(
+      CustomMigrationPlan migrationPlan, Set<String> variablesToRemove) {
+    migrationPlan.getVariablesToRemove().clear();
+    migrationPlan.getVariablesToRemove().addAll(variablesToRemove);
   }
 }

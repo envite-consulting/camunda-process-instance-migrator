@@ -17,4 +17,5 @@ public record MinorMigrationInstructions(
     int targetMinorVersion,
     @NonNull List<MigrationInstruction> migrationInstructions,
     int majorVersion,
-    Map<String, Object> variables) {}
+    Map<String, Object> variables,
+    List<String> variablesToRemove) {}

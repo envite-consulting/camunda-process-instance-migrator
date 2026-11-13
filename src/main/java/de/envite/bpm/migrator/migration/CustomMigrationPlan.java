@@ -13,4 +13,5 @@ public class CustomMigrationPlan {
   private String targetProcessDefinitionId;
   private List<CustomMigrationInstruction> instructions;
   private Map<String, Object> variables;
+  private List<String> variablesToRemove;
 }
