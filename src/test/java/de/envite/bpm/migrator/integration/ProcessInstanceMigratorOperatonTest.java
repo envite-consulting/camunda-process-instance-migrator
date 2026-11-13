@@ -8,6 +8,7 @@ import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListA
 import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterOperaton.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
 import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
@@ -19,6 +20,8 @@ import static org.operaton.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskSe
 
 import de.envite.bpm.migrator.ProcessInstanceMigrator;
 import de.envite.bpm.migrator.ProcessInstanceMigratorBuilder;
+import de.envite.bpm.migrator.exception.MigrationException;
+import de.envite.bpm.migrator.exception.MigrationPlanGenerationException;
 import de.envite.bpm.migrator.instructions.impl.MigrationPropertiesImpl;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -222,7 +225,12 @@ class ProcessInstanceMigratorOperatonTest {
         .allTasksHaveName("Do something")
         .allTasksHaveFormkey(null);
 
-    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    assertThatThrownBy(
+            () ->
+                processInstanceMigratorBuilder
+                    .build()
+                    .migrateProcessInstances(PROCESS_DEFINITION_KEY))
+        .isInstanceOf(MigrationException.class);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -270,7 +278,12 @@ class ProcessInstanceMigratorOperatonTest {
     assertThat(processInstance1).isWaitingAtExactly("ReceiveTask1");
     assertThat(processInstance2).isWaitingAtExactly("ReceiveTask1");
 
-    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    assertThatThrownBy(
+            () ->
+                processInstanceMigratorBuilder
+                    .build()
+                    .migrateProcessInstances(PROCESS_DEFINITION_KEY))
+        .isInstanceOf(MigrationException.class);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -422,7 +435,12 @@ class ProcessInstanceMigratorOperatonTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    assertThatThrownBy(
+            () ->
+                processInstanceMigratorBuilder
+                    .build()
+                    .migrateProcessInstances(PROCESS_DEFINITION_KEY))
+        .isInstanceOf(MigrationException.class);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -459,7 +477,12 @@ class ProcessInstanceMigratorOperatonTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigratorBuilder.build().migrateProcessInstances(PROCESS_DEFINITION_KEY);
+    assertThatThrownBy(
+            () ->
+                processInstanceMigratorBuilder
+                    .build()
+                    .migrateProcessInstances(PROCESS_DEFINITION_KEY))
+        .isInstanceOf(MigrationPlanGenerationException.class);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)

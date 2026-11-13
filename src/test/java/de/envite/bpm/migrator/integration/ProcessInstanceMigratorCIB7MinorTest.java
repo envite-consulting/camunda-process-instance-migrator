@@ -5,6 +5,7 @@ import static de.envite.bpm.migrator.integration.TestHelperCIB7.getRunningProces
 import static de.envite.bpm.migrator.integration.assertions.ProcessInstanceListAsserterCIB7.assertThat;
 import static de.envite.bpm.migrator.integration.assertions.TaskListAsserterCIB7.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.complete;
 import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.managementService;
@@ -16,6 +17,7 @@ import static org.cibseven.bpm.engine.test.assertions.bpmn.BpmnAwareTests.taskSe
 
 import de.envite.bpm.migrator.ProcessInstanceMigrator;
 import de.envite.bpm.migrator.ProcessInstanceMigratorBuilder;
+import de.envite.bpm.migrator.exception.MigrationException;
 import de.envite.bpm.migrator.instructions.MinorMigrationInstructions;
 import de.envite.bpm.migrator.instructions.impl.MigrationInstructionsImpl;
 import de.envite.bpm.migrator.instructions.impl.MigrationPropertiesImpl;
@@ -120,7 +122,8 @@ class ProcessInstanceMigratorCIB7MinorTest {
         .allTasksHaveDefinitionId(initialProcessDefinition.getId())
         .allTasksHaveFormkey(null);
 
-    processInstanceMigrator.migrateInstancesOfAllProcesses();
+    assertThatThrownBy(() -> processInstanceMigrator.migrateInstancesOfAllProcesses())
+        .isInstanceOf(MigrationException.class);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
@@ -189,7 +192,8 @@ class ProcessInstanceMigratorCIB7MinorTest {
 
     migrationInstructionsImpl.putInstructions(
         PROCESS_DEFINITION_KEY, generateFaultyMigrationInstructionsFor100To150());
-    processInstanceMigrator.migrateInstancesOfAllProcesses();
+    assertThatThrownBy(() -> processInstanceMigrator.migrateInstancesOfAllProcesses())
+        .isInstanceOf(MigrationException.class);
 
     assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
         .numberOfProcessInstancesIs(2)
