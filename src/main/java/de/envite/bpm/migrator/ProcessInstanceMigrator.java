@@ -1,7 +1,11 @@
 package de.envite.bpm.migrator;
 
+import de.envite.bpm.migrator.exception.AggregatedMigrationException;
+import de.envite.bpm.migrator.exception.MigrationException;
+import de.envite.bpm.migrator.exception.MigrationPlanGenerationException;
 import de.envite.bpm.migrator.instances.GetOlderProcessInstances;
 import de.envite.bpm.migrator.instances.VersionedProcessInstance;
+import de.envite.bpm.migrator.instructions.MigrationErrorHandling;
 import de.envite.bpm.migrator.instructions.MigrationInstructionCombiner;
 import de.envite.bpm.migrator.instructions.MigrationInstructions;
 import de.envite.bpm.migrator.instructions.MigrationInstructionsAdder;
@@ -17,6 +21,7 @@ import de.envite.bpm.migrator.plan.CreatePatchMigrationPlan;
 import de.envite.bpm.migrator.plan.LoadNewestDeployedVersion;
 import de.envite.bpm.migrator.plan.VersionedDefinitionId;
 import de.envite.bpm.migrator.processmetadata.LoadProcessDefinitionKeys;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -65,6 +70,8 @@ public class ProcessInstanceMigrator {
     generateAllInstancesLoggingData.forDefinitionKey(processDefinitionKey).stream()
         .forEach(migratorLogger::logProcessInstancesInfo);
 
+    List<RuntimeException> failures = new ArrayList<>();
+
     Optional<VersionedDefinitionId> newestProcessDefinition =
         loadNewestDeployedVersion.forProcessDefinitionKey(processDefinitionKey);
     if (newestProcessDefinition.isEmpty()) {
@@ -79,6 +86,9 @@ public class ProcessInstanceMigrator {
       List<VersionedProcessInstance> olderProcessInstances =
           getOlderProcessInstances.getOlderProcessInstances(
               processDefinitionKey, newestProcessVersion);
+
+      MigrationErrorHandling errorHandling =
+          migrationProperties.errorHandling(processDefinitionKey);
 
       for (VersionedProcessInstance processInstance : olderProcessInstances) {
         CustomMigrationPlan migrationPlan = null;
@@ -122,26 +132,68 @@ public class ProcessInstanceMigrator {
                     newestProcessVersion.toVersionTag());
 
           } catch (Exception e) {
-            migratorLogger.logMigrationError(
-                processInstance.processInstanceId(),
-                processInstance.businessKey(),
-                processInstance.processVersion().toVersionTag(),
-                newestProcessVersion.toVersionTag(),
-                processInstance.processDefinitionId(),
-                newestProcessDefinition.get().processDefinitionId(),
-                e);
+            switch (errorHandling) {
+              case LOG_ONLY ->
+                  migratorLogger.logMigrationError(
+                      processInstance.processInstanceId(),
+                      processInstance.businessKey(),
+                      processInstance.processVersion().toVersionTag(),
+                      newestProcessVersion.toVersionTag(),
+                      processInstance.processDefinitionId(),
+                      newestProcessDefinition.get().processDefinitionId(),
+                      e);
+              case FAIL_FAST ->
+                  throw new MigrationException(
+                      processInstance.processInstanceId(),
+                      processInstance.businessKey(),
+                      processInstance.processVersion().toVersionTag(),
+                      newestProcessVersion.toVersionTag(),
+                      processInstance.processDefinitionId(),
+                      newestProcessDefinition.get().processDefinitionId(),
+                      e);
+              case COLLECT_AND_THROW ->
+                  failures.add(
+                      new MigrationException(
+                          processInstance.processInstanceId(),
+                          processInstance.businessKey(),
+                          processInstance.processVersion().toVersionTag(),
+                          newestProcessVersion.toVersionTag(),
+                          processInstance.processDefinitionId(),
+                          newestProcessDefinition.get().processDefinitionId(),
+                          e));
+            }
           }
         } else {
-          migratorLogger.logMigrationPlanGenerationError(
-              processInstance.processInstanceId(),
-              processInstance.businessKey(),
-              processInstance.processVersion().toVersionTag(),
-              newestProcessVersion.toVersionTag());
+          switch (errorHandling) {
+            case LOG_ONLY ->
+                migratorLogger.logMigrationPlanGenerationError(
+                    processInstance.processInstanceId(),
+                    processInstance.businessKey(),
+                    processInstance.processVersion().toVersionTag(),
+                    newestProcessVersion.toVersionTag());
+            case FAIL_FAST ->
+                throw new MigrationPlanGenerationException(
+                    processInstance.processInstanceId(),
+                    processInstance.businessKey(),
+                    processInstance.processVersion().toVersionTag(),
+                    newestProcessVersion.toVersionTag());
+            case COLLECT_AND_THROW ->
+                failures.add(
+                    new MigrationPlanGenerationException(
+                        processInstance.processInstanceId(),
+                        processInstance.businessKey(),
+                        processInstance.processVersion().toVersionTag(),
+                        newestProcessVersion.toVersionTag()));
+          }
         }
       }
     }
     migratorLogger.logMessageForInstancesAfterMigration(processDefinitionKey);
     generateAllInstancesLoggingData.forDefinitionKey(processDefinitionKey).stream()
         .forEach(migratorLogger::logProcessInstancesInfo);
+
+    if (!failures.isEmpty()) {
+      throw new AggregatedMigrationException(processDefinitionKey, failures);
+    }
   }
 }

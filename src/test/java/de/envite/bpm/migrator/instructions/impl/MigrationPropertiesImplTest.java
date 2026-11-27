@@ -2,6 +2,7 @@ package de.envite.bpm.migrator.instructions.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import de.envite.bpm.migrator.instructions.MigrationErrorHandling;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,5 +46,19 @@ class MigrationPropertiesImplTest {
     migrationPropertiesImpl.putExecuteAsync("processKey", true);
 
     assertThat(migrationPropertiesImpl.executeAsync("processKey")).isTrue();
+  }
+
+  @Test
+  void errorHandling_should_return_failFast_by_default() {
+    assertThat(migrationPropertiesImpl.errorHandling("unknownKey"))
+        .isEqualTo(MigrationErrorHandling.FAIL_FAST);
+  }
+
+  @Test
+  void errorHandling_should_return_configured_value() {
+    migrationPropertiesImpl.putErrorHandling("processKey", MigrationErrorHandling.LOG_ONLY);
+
+    assertThat(migrationPropertiesImpl.errorHandling("processKey"))
+        .isEqualTo(MigrationErrorHandling.LOG_ONLY);
   }
 }
