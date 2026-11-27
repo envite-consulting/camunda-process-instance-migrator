@@ -140,6 +140,23 @@ public class TestHelperCamunda {
         .build();
   }
 
+  public static MinorMigrationInstructions createMinorMigrationInstructions(
+      int majorVersion,
+      int sourceMinorVersion,
+      int targetMinorVersion,
+      List<MigrationInstruction> instructions,
+      Map<String, Object> variables,
+      List<String> variablesToRemove) {
+    return MinorMigrationInstructions.builder()
+        .majorVersion(majorVersion)
+        .sourceMinorVersion(sourceMinorVersion)
+        .targetMinorVersion(targetMinorVersion)
+        .migrationInstructions(instructions)
+        .variables(variables)
+        .variablesToRemove(variablesToRemove)
+        .build();
+  }
+
   public static CustomMigrationPlan createCustomMigrationPlan(
       String sourceDefinitionId,
       String targetDefinitionId,
@@ -150,6 +167,21 @@ public class TestHelperCamunda {
         .targetProcessDefinitionId(targetDefinitionId)
         .instructions(instructions)
         .variables(variables)
+        .build();
+  }
+
+  public static CustomMigrationPlan createCustomMigrationPlan(
+      String sourceDefinitionId,
+      String targetDefinitionId,
+      List<CustomMigrationInstruction> instructions,
+      Map<String, Object> variables,
+      List<String> variablesToRemove) {
+    return CustomMigrationPlan.builder()
+        .sourceProcessDefinitionId(sourceDefinitionId)
+        .targetProcessDefinitionId(targetDefinitionId)
+        .instructions(instructions)
+        .variables(variables)
+        .variablesToRemove(variablesToRemove)
         .build();
   }
 }

@@ -137,4 +137,21 @@ public class TestHelperOperaton {
         .variables(variables)
         .build();
   }
+
+  public static MinorMigrationInstructions createMinorMigrationInstructions(
+      int majorVersion,
+      int sourceMinorVersion,
+      int targetMinorVersion,
+      List<MigrationInstruction> instructions,
+      Map<String, Object> variables,
+      List<String> variablesToRemove) {
+    return MinorMigrationInstructions.builder()
+        .majorVersion(majorVersion)
+        .sourceMinorVersion(sourceMinorVersion)
+        .targetMinorVersion(targetMinorVersion)
+        .migrationInstructions(instructions)
+        .variables(variables)
+        .variablesToRemove(variablesToRemove)
+        .build();
+  }
 }

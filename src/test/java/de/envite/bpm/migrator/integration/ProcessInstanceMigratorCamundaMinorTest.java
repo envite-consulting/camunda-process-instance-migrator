@@ -502,6 +502,40 @@ class ProcessInstanceMigratorCamundaMinorTest {
   }
 
   @Test
+  void processInstanceMigrator_should_remove_variables_when_migrating_to_higher_minor_version() {
+    runtimeService().setVariable(processInstance1.getId(), "obsoleteVar", "value");
+    runtimeService().setVariable(processInstance2.getId(), "obsoleteVar", "value");
+
+    newestProcessDefinitionAfterRedeployment =
+        TestHelperCamunda.deployNewProcessModel(
+            MINOR_INCREASED_PROCESS_MODEL_PATH,
+            "1.5.0",
+            PROCESS_DEFINITION_KEY,
+            repositoryService());
+
+    migrationInstructionsImpl.putInstructions(
+        PROCESS_DEFINITION_KEY,
+        Collections.singletonList(
+            TestHelperCamunda.createMinorMigrationInstructions(
+                1,
+                5,
+                0,
+                List.of(new MigrationInstructionImpl("UserTask1", "UserTask2")),
+                Map.of(),
+                List.of("obsoleteVar"))));
+    processInstanceMigrator.migrateInstancesOfAllProcesses();
+
+    assertThat(getRunningProcessInstances(PROCESS_DEFINITION_KEY, runtimeService()))
+        .numberOfProcessInstancesIs(2)
+        .allProcessInstancesHaveDefinitionId(newestProcessDefinitionAfterRedeployment.getId());
+
+    assertThat(runtimeService().getVariables(processInstance1.getId()))
+        .doesNotContainKey("obsoleteVar");
+    assertThat(runtimeService().getVariables(processInstance2.getId()))
+        .doesNotContainKey("obsoleteVar");
+  }
+
+  @Test
   void processInstanceMigrator_should_migrate_all_process_instances_to_latest_minor() {
     TestHelperCamunda.deployNewProcessModel(
         MINOR_1_1_0_PROCESS_MODEL_PATH, "1.1.0", PROCESS_DEFINITION_KEY, repositoryService());

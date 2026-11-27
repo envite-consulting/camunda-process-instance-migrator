@@ -4,8 +4,10 @@ import de.envite.bpm.migrator.migration.CustomMigrationInstruction;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MigrationInstructionCombiner {
 
@@ -75,6 +77,23 @@ public class MigrationInstructionCombiner {
         .sorted(Comparator.comparingInt(MinorMigrationInstructions::sourceMinorVersion))
         .filter(m -> m.variables() != null)
         .forEach(m -> combined.putAll(m.variables()));
+    return combined;
+  }
+
+  /**
+   * Combines the variable names to be removed from a list of {@link MinorMigrationInstructions}
+   * into a single set, taking into account all minor migrations that are to be applied.
+   *
+   * @param applicableMinorMigrationInstructions the migration instructions that are to be combined.
+   * @return a set of variable names that are to be removed during migration.
+   */
+  public static Set<String> combineVariablesToRemove(
+      List<MinorMigrationInstructions> applicableMinorMigrationInstructions) {
+    Set<String> combined = new LinkedHashSet<>();
+    applicableMinorMigrationInstructions.stream()
+        .sorted(Comparator.comparingInt(MinorMigrationInstructions::sourceMinorVersion))
+        .filter(m -> m.variablesToRemove() != null)
+        .forEach(m -> combined.addAll(m.variablesToRemove()));
     return combined;
   }
 }

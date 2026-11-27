@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -156,5 +157,29 @@ class MigrationInstructionsAdderTest {
     MigrationInstructionsAdder.addVariables(plan, Map.of("new", "y"));
 
     assertThat(plan.getVariables()).containsEntry("new", "y").doesNotContainKey("old").hasSize(1);
+  }
+
+  @Test
+  void removeVariables_should_put_variable_names_into_plan() {
+    CustomMigrationPlan plan =
+        TestHelperCamunda.createCustomMigrationPlan(
+            "source", "target", new ArrayList<>(), new HashMap<>(), new ArrayList<>());
+
+    MigrationInstructionsAdder.removeVariables(plan, Set.of("a", "b"));
+
+    assertThat(plan.getVariablesToRemove()).containsExactlyInAnyOrder("a", "b");
+  }
+
+  @Test
+  void removeVariables_should_clear_existing_variablesToRemove_before_adding() {
+    List<String> existingVariablesToRemove = new ArrayList<>();
+    existingVariablesToRemove.add("old");
+    CustomMigrationPlan plan =
+        TestHelperCamunda.createCustomMigrationPlan(
+            "source", "target", new ArrayList<>(), new HashMap<>(), existingVariablesToRemove);
+
+    MigrationInstructionsAdder.removeVariables(plan, Set.of("new"));
+
+    assertThat(plan.getVariablesToRemove()).containsExactly("new");
   }
 }
